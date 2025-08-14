@@ -49,8 +49,7 @@ class Vehicle(models.Model):
     class Meta:
         verbose_name = 'Автомобиль'
         verbose_name_plural = 'Автомобили'
-        ordering = ['-created_at']
 
 
     def __str__(self):
-        return f'{self.year} г., {self.mileage} км — {self.get_fuel_type_display()}'
+        return f'{self.year} г., {self.mileage} км., {self.color}, {self.price}, {self.get_fuel_type_display()}, {self.get_transmission_display()} {self.created_at}'
