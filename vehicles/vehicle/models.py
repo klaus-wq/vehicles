@@ -16,6 +16,11 @@ class Vehicle(models.Model):
         ('variator', 'Вариатор'),
     ]
 
+    id = models.AutoField(
+        primary_key=True,
+        verbose_name='Уникальный идентификатор'
+    )
+
     price = models.DecimalField(
         max_digits=12,
         decimal_places=2,
@@ -52,4 +57,4 @@ class Vehicle(models.Model):
 
 
     def __str__(self):
-        return f'{self.year} г., {self.mileage} км., {self.color}, {self.price}, {self.get_fuel_type_display()}, {self.get_transmission_display()} {self.created_at}'
+        return f'{self.id}, {self.year} г., {self.mileage} км., {self.color}, {self.price}, {self.get_fuel_type_display()}, {self.get_transmission_display()}'
