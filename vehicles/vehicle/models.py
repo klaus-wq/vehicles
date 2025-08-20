@@ -57,7 +57,11 @@ class Vehicle(models.Model):
         primary_key=True,
         verbose_name='Уникальный идентификатор'
     )
-
+    car_number = models.CharField(
+        max_length=15,
+        unique=True,
+        verbose_name='Государственный номер',
+    )
     price = models.DecimalField(
         max_digits=12,
         decimal_places=2,
@@ -100,4 +104,4 @@ class Vehicle(models.Model):
 
 
     def __str__(self):
-        return f'{self.id}, {self.brand}, {self.year} г., {self.mileage} км., {self.color}, {self.price}, {self.get_fuel_type_display()}, {self.get_transmission_display()}'
+        return f'{self.id}, {self.car_number}, {self.brand}, {self.year} г., {self.mileage} км., {self.color}, {self.price}, {self.get_fuel_type_display()}, {self.get_transmission_display()}'
