@@ -8,6 +8,10 @@ class Brand(models.Model):
         ('motorcycle', 'Мотоцикл'),
     ]
 
+    id = models.AutoField(
+        primary_key=True,
+        verbose_name='Уникальный идентификатор'
+    )
     name = models.CharField(
         max_length=50,
         unique=True,
@@ -35,7 +39,7 @@ class Brand(models.Model):
         verbose_name_plural = 'Бренды'
 
     def __str__(self):
-        return f'{self.name}, {self.get_vehicle_type_display()}, {self.fuel_tank_capacity} л., {self.cargo_capacity} кг., {self.seating_capacity}'
+        return f'{self.id}, {self.name}, {self.get_vehicle_type_display()}, {self.fuel_tank_capacity} л., {self.cargo_capacity} кг., {self.seating_capacity}'
 
 class Vehicle(models.Model):
     FUEL_TYPE_CHOICES = [
