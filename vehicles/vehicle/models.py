@@ -1,5 +1,42 @@
 from django.db import models
 
+class Brand(models.Model):
+    VEHICLE_TYPE_CHOICES = [
+        ('car', 'Легковой'),
+        ('truck', 'Грузовой'),
+        ('bus', 'Автобус'),
+        ('motorcycle', 'Мотоцикл'),
+    ]
+
+    name = models.CharField(
+        max_length=50,
+        unique=True,
+        verbose_name='Название бренда'
+    )
+    vehicle_type = models.CharField(
+        max_length=20,
+        choices=VEHICLE_TYPE_CHOICES,
+        verbose_name='Тип транспорта'
+    )
+    fuel_tank_capacity = models.PositiveSmallIntegerField(
+        verbose_name='Объем бака, л'
+    )
+    cargo_capacity = models.PositiveSmallIntegerField(
+        verbose_name='Грузоподъемность, кг',
+        null=True,
+        blank=True
+    )
+    seating_capacity = models.PositiveSmallIntegerField(
+        verbose_name='Количество мест'
+    )
+
+    class Meta:
+        verbose_name = 'Бренд'
+        verbose_name_plural = 'Бренды'
+
+    def __str__(self):
+        return f'{self.name}, {self.get_vehicle_type_display()}, {self.fuel_tank_capacity} л., {self.cargo_capacity} кг., {self.seating_capacity}'
+
 class Vehicle(models.Model):
     FUEL_TYPE_CHOICES = [
         ('gasoline', 'Бензин'),
@@ -50,6 +87,12 @@ class Vehicle(models.Model):
         auto_now_add=True,
         verbose_name='Дата добавления'
     )
+    brand = models.ForeignKey(
+        'Brand',
+        on_delete=models.PROTECT,
+        null=True,
+        verbose_name='Бренд'
+    )
 
     class Meta:
         verbose_name = 'Автомобиль'
@@ -57,4 +100,4 @@ class Vehicle(models.Model):
 
 
     def __str__(self):
-        return f'{self.id}, {self.year} г., {self.mileage} км., {self.color}, {self.price}, {self.get_fuel_type_display()}, {self.get_transmission_display()}'
+        return f'{self.id}, {self.brand}, {self.year} г., {self.mileage} км., {self.color}, {self.price}, {self.get_fuel_type_display()}, {self.get_transmission_display()}'
