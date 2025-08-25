@@ -99,6 +99,8 @@ class Vehicle(models.Model):
         'Brand',
         on_delete=models.PROTECT,
         null=True,
+        blank=True,
+        default=None,
         verbose_name='Бренд'
     )
 
