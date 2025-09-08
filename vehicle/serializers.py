@@ -9,23 +9,12 @@ class BrandSerializer(serializers.ModelSerializer):
         model = Brand
         fields = ['id', 'name', 'vehicle_type', 'fuel_tank_capacity', 'cargo_capacity', 'seating_capacity']
 
-class EnterpriseSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Enterprise
-        fields = [
-            'id',
-            'name',
-            'city',
-            'address',
-            'phone'
-        ]
-
 class DriverSerializer(serializers.ModelSerializer):
     class Meta:
         model = Driver
         fields = [
             'id',
-            'enterprise',
+            # 'enterprise',
             'first_name',
             'last_name',
             'license_number',
@@ -34,7 +23,7 @@ class DriverSerializer(serializers.ModelSerializer):
         ]
 
 class VehicleSerializer(serializers.ModelSerializer):
-    # active_driver = serializers.SerializerMethodField()
+    active_driver = serializers.SerializerMethodField()
 
     class Meta:
         model = Vehicle
@@ -49,16 +38,19 @@ class VehicleSerializer(serializers.ModelSerializer):
             'color',
             'created_at',
             'brand',
-            'enterprise',
+            # 'enterprise',
             'drivers',
-            # 'active_driver'
+            'active_driver'
         ]
 
     def get_active_driver(self, obj):
-        active_driver = obj.vehicle_drivers.filter(is_active=True).first()
-        if active_driver:
-            return active_driver.id
-        return None
+        try:
+            active_driver = obj.vehicle_drivers.filter(is_active=True).first()
+            if active_driver:
+                return active_driver.id
+            return -1
+        except:
+            return -1
 
 class DriverVehicleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -68,3 +60,25 @@ class DriverVehicleSerializer(serializers.ModelSerializer):
             'vehicle',
             'is_active'
         ]
+
+class EnterpriseSerializer(serializers.ModelSerializer):
+    drivers = serializers.SerializerMethodField()
+    vehicles = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Enterprise
+        fields = [
+            'id',
+            'name',
+            'city',
+            'address',
+            'phone',
+            'drivers',
+            'vehicles'
+        ]
+
+    def get_drivers(self, obj):
+        return list(obj.drivers.values_list('id', flat=True))
+
+    def get_vehicles(self, obj):
+        return list(obj.vehicles.values_list('id', flat=True))

@@ -37,7 +37,8 @@ class Driver(models.Model):
     enterprise = models.ForeignKey(
         Enterprise,
         on_delete=models.CASCADE,
-        verbose_name='Предприятие'
+        verbose_name='Предприятие',
+        related_name='drivers'
     )
     first_name = models.CharField(
         max_length=50,
@@ -191,6 +192,7 @@ class Vehicle(models.Model):
         Enterprise,
         on_delete=models.CASCADE,
         verbose_name='Предприятие',
+        related_name='vehicles'
     )
     drivers = models.ManyToManyField(
         Driver,
