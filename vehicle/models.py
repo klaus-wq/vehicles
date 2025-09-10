@@ -58,29 +58,29 @@ class Driver(models.Model):
         decimal_places=2,
         verbose_name='Заработная плата, ₽'
     )
-    vehicles = models.ManyToManyField(
-        'Vehicle',
-        through='DriverVehicle',
-        related_name='driver_vehicles',
-        verbose_name='автомобили'
-    )
+    # vehicles = models.ManyToManyField(
+    #     'Vehicle',
+    #     through='DriverVehicle',
+    #     related_name='driver_vehicles',
+    #     verbose_name='автомобили'
+    # )
 
     class Meta:
         verbose_name = 'Водитель'
         verbose_name_plural = 'Водители'
 
     def __str__(self):
-        vehicles_list = ", ".join([f"{vehicle.id} {vehicle.car_number}" for vehicle in self.vehicles.all()])
-        return f'{self.id}, {self.last_name} {self.first_name}, {self.enterprise.name}, {vehicles_list}'
+        # vehicles_list = ", ".join([f"{vehicle.id} {vehicle.car_number}" for vehicle in self.vehicles.all()])
+        return f'{self.id}, {self.last_name} {self.first_name}, {self.enterprise.name}'
 
-    def save(self, *args, **kwargs):
-        if self.pk:
-            original = Driver.objects.get(pk=self.pk)
-            if original.enterprise != self.enterprise and self.vehicles.exists():
-                raise ValidationError(
-                    "Нельзя изменить предприятие, если водителю назначен автомобиль."
-                )
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     if self.pk:
+    #         original = Driver.objects.get(pk=self.pk)
+    #         if original.enterprise != self.enterprise and self.vehicles.exists():
+    #             raise ValidationError(
+    #                 "Нельзя изменить предприятие, если водителю назначен автомобиль."
+    #             )
+    #     super().save(*args, **kwargs)
 
 
 class Brand(models.Model):
@@ -194,28 +194,33 @@ class Vehicle(models.Model):
         verbose_name='Предприятие',
         related_name='vehicles'
     )
-    drivers = models.ManyToManyField(
+    driver = models.ForeignKey(
         Driver,
-        through='DriverVehicle',
-        related_name='vehicle_drivers',
-        verbose_name='водители'
+        on_delete=models.CASCADE,
+        verbose_name='водители',
+        default=1,
+        related_name='vehicles1'
     )
+    is_active = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'Автомобиль'
         verbose_name_plural = 'Автомобили'
 
     def __str__(self):
-        drivers_list = ", ".join([f"{driver.last_name} {driver.first_name}" for driver in self.drivers.all()])
-        return f'{self.id}, {self.car_number}, {self.enterprise.name}, {drivers_list}'
+        # drivers_list = ", ".join([f"{driver.last_name} {driver.first_name}" for driver in self.drivers.all()])
+        return f'{self.id}, {self.car_number}, {self.enterprise.name}, {self.driver}'
         # return f'{self.id}, {self.enterprise}, {self.drivers}, {self.car_number}, {self.brand}, {self.year} г., {self.mileage} км., {self.color}, {self.price}, {self.get_fuel_type_display()}, {self.get_transmission_display()}'
 
     def save(self, *args, **kwargs):
-        if self.pk:
-            original = Vehicle.objects.get(pk=self.pk)
-            if (original.enterprise != self.enterprise and self.drivers.exists()):
+        if self.is_active:
+            # Проверяем, нет ли у водителя других активных автомобилей
+            if Vehicle.objects.filter(
+                driver=self.driver,
+                is_active=True
+            ).exclude(pk=self.pk).exists():
                 raise ValidationError(
-                    "Нельзя изменить предприятие, если автомобилю назначены водители."
+                    "Водитель уже активен для другого автомобиля"
                 )
         super().save(*args, **kwargs)
 

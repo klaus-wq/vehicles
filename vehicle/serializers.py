@@ -9,21 +9,8 @@ class BrandSerializer(serializers.ModelSerializer):
         model = Brand
         fields = ['id', 'name', 'vehicle_type', 'fuel_tank_capacity', 'cargo_capacity', 'seating_capacity']
 
-class DriverSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Driver
-        fields = [
-            'id',
-            # 'enterprise',
-            'first_name',
-            'last_name',
-            'license_number',
-            'salary'
-            # 'vehicles'
-        ]
-
 class VehicleSerializer(serializers.ModelSerializer):
-    active_driver = serializers.SerializerMethodField()
+    # active_driver = serializers.SerializerMethodField()
 
     class Meta:
         model = Vehicle
@@ -39,18 +26,33 @@ class VehicleSerializer(serializers.ModelSerializer):
             'created_at',
             'brand',
             # 'enterprise',
-            'drivers',
-            'active_driver'
+            'driver',
+            'is_active'
         ]
 
-    def get_active_driver(self, obj):
-        try:
-            active_driver = obj.vehicle_drivers.filter(is_active=True).first()
-            if active_driver:
-                return active_driver.id
-            return -1
-        except:
-            return -1
+    # def get_active_driver(self, obj):
+    #     try:
+    #         active_driver = obj.vehicle_drivers.filter(is_active=True).first()
+    #         if active_driver:
+    #             return active_driver.id
+    #         return -1
+    #     except:
+    #         return -1
+
+class DriverSerializer(serializers.ModelSerializer):
+    vehicles = VehicleSerializer(many=True, read_only=True, source='vehicles1')
+
+    class Meta:
+        model = Driver
+        fields = [
+            'id',
+            # 'enterprise',
+            'first_name',
+            'last_name',
+            'license_number',
+            'salary',
+            'vehicles'
+        ]
 
 class DriverVehicleSerializer(serializers.ModelSerializer):
     class Meta:
