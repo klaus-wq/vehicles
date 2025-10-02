@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from vehicle.models import Vehicle, Enterprise, Driver, DriverVehicle
+from vehicle.models import Vehicle, Enterprise, Driver, DriverVehicle, Manager
 
 from vehicle.models import Brand
 
@@ -47,7 +47,7 @@ class VehicleSerializer(serializers.ModelSerializer):
         try:
             active_driver = obj.vehicle_drivers.filter(is_active=True).first()
             if active_driver:
-                return active_driver.id
+                return active_driver.driver.id
             return -1
         except:
             return -1
@@ -61,9 +61,17 @@ class DriverVehicleSerializer(serializers.ModelSerializer):
             'is_active'
         ]
 
+class ManagerSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+
+    class Meta:
+        model = Manager
+        fields = ['id', 'username', 'enterprises']
+
 class EnterpriseSerializer(serializers.ModelSerializer):
     drivers = serializers.SerializerMethodField()
     vehicles = serializers.SerializerMethodField()
+    managers = [manager['id'] for manager in ManagerSerializer(Manager.objects.all(), many=True).data]
 
     class Meta:
         model = Enterprise
@@ -74,7 +82,8 @@ class EnterpriseSerializer(serializers.ModelSerializer):
             'address',
             'phone',
             'drivers',
-            'vehicles'
+            'vehicles',
+            'managers'
         ]
 
     def get_drivers(self, obj):

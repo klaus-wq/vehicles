@@ -19,6 +19,7 @@ from django.urls import path, include
 from rest_framework import routers
 
 from vehicle.views import VehicleViewSet, DriverViewSet, EnterpriseViewSet, DriverVehicleViewSet
+from rest_framework.authtoken import views as token_views
 
 router = routers.DefaultRouter()
 router.register(r'vehicles', VehicleViewSet)
@@ -30,4 +31,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('api-token-auth/', token_views.obtain_auth_token),
 ]
