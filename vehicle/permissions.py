@@ -1,10 +1,11 @@
 from rest_framework import permissions
-from vehicle.models import Enterprise, Manager
+
+from authentication.models import Manager
+from vehicle.models import Enterprise
 from django.contrib import admin
 
 class ManagerPermissionAdmin(admin.ModelAdmin):
     def has_module_permission(self, request):
-        # Разрешаем менеджерам видеть модуль в админке
         return request.user.is_staff and (request.user.is_superuser or hasattr(request.user, 'manager'))
 
     def has_view_permission(self, request, obj=None):
@@ -17,30 +18,24 @@ class ManagerPermissionAdmin(admin.ModelAdmin):
         return self.has_module_permission(request)
 
     def has_delete_permission(self, request, obj=None):
-        # Менеджеры не могут удалять
         return request.user.is_superuser
 
 class IsManagerOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
-        # Все пользователи могут просматривать данные
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        # Только аутентифицированные пользователи могут изменять данные
         return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        # Суперпользователи имеют полный доступ
         if request.user.is_superuser:
             return True
 
-        # Проверяем, аутентифицирован ли пользователь
         if not request.user.is_authenticated:
             return False
 
         try:
             manager = request.user.manager
-            # Проверяем, принадлежит ли объект менеджеру
             if hasattr(obj, 'enterprise'):
                 return obj.enterprise in manager.enterprises.all()
             elif isinstance(obj, Enterprise):

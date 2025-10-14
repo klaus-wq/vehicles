@@ -1,5 +1,8 @@
 from rest_framework import serializers
-from vehicle.models import Vehicle, Enterprise, Driver, DriverVehicle, Manager
+
+from authentication.models import Manager
+from authentication.serializers import ManagerSerializer
+from vehicle.models import Vehicle, Enterprise, Driver, DriverVehicle
 
 from vehicle.models import Brand
 
@@ -61,17 +64,11 @@ class DriverVehicleSerializer(serializers.ModelSerializer):
             'is_active'
         ]
 
-class ManagerSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username', read_only=True)
-
-    class Meta:
-        model = Manager
-        fields = ['id', 'username', 'enterprises']
-
 class EnterpriseSerializer(serializers.ModelSerializer):
     drivers = serializers.SerializerMethodField()
     vehicles = serializers.SerializerMethodField()
-    managers = [manager['id'] for manager in ManagerSerializer(Manager.objects.all(), many=True).data]
+    managers = ManagerSerializer(source='managers', many=True, read_only=True)
+    # managers = [manager['id'] for manager in ManagerSerializer(Manager.objects.all(), many=True).data]
 
     class Meta:
         model = Enterprise

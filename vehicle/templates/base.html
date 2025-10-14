@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Мой сайт{% endblock %}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        tr:hover { background-color: #f5f5f5; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Предприятия</h1>
+        <nav>
+            <a href="{% url 'enterprises_list' %}">Предприятия</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'rest_framework:logout' %}">Выйти ({{ user.username }})</a>
+            {% else %}
+                <a href="{% url 'rest_framework:login' %}">Войти</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>Система управления автомобилями</p>
+    </footer>
+</body>
+</html>

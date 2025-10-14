@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}Создание предприятия{% endblock %}
+
+{% block content %}
+  <h1>Создание нового предприятия</h1>
+  
+  {% if not request.user.is_superuser %}
+    <div class="error-message">
+      <p>У вас нет прав для создания предприятий. Только суперпользователи могут создавать предприятия.</p>
+    </div>
+  {% else %}
+    <form method="post" action="{% url 'enterprise_create' %}" id="enterprise-form">
+      {% csrf_token %}
+      
+      <div class="form-group">
+        <label for="id_name">Название предприятия:</label>
+        <input type="text" id="id_name" name="name" required class="form-control" placeholder="Введите название предприятия">
+        <div id="name-error" class="error-message"></div>
+      </div>
+      
+      <div class="form-group">
+        <label for="id_city">Город:</label>
+        <input type="text" id="id_city" name="city" required class="form-control" placeholder="Введите город">
+        <div id="city-error" class="error-message"></div>
+      </div>
+      
+      <div class="form-group">
+        <label for="id_address">Адрес:</label>
+        <input type="text" id="id_address" name="address" class="form-control" placeholder="Введите адрес">
+        <div id="address-error" class="error-message"></div>
+      </div>
+      
+      <div class="form-group">
+        <label for="id_phone">Телефон:</label>
+        <input type="tel" id="id_phone" name="phone" class="form-control" placeholder="Введите телефон">
+        <div id="phone-error" class="error-message"></div>
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Создать предприятие</button>
+        <a href="{% url 'enterprises_list' %}" class="btn btn-secondary">Отмена</a>
+      </div>
+    </form>
+    
+    <div id="success-message" class="success-message" style="display: none;">
+      <p>Предприятие успешно создано!</p>
+      <p>Название: <span id="success-name"></span></p>
+      <p>Город: <span id="success-city"></span></p>
+      <a href="{% url 'enterprises_list' %}" class="btn btn-primary">Вернуться к списку предприятий</a>
+    </div>
+    
+    <div id="api-error" class="error-message" style="display: none;"></div>
+  {% endif %}
+  
+  <style>
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .error-message {
+      color: #dc3545;
+      margin-top: 0.5rem;
+      display: none;
+    }
+    
+    .success-message {
+      background-color: #d4edda;
+      border-color: #c3e6cb;
+      color: #155724;
+      padding: 1rem;
+      border-radius: 4px;
+      margin-top: 1rem;
+    }
+    
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .btn-primary {
+      background-color: #007bff;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: #0069d9;
+    }
+    
+    .btn-secondary {
+      background-color: #6c757d;
+      color: white;
+      margin-left: 0.5rem;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #5a6268;
+    }
+    
+    .form-actions {
+      margin-top: 1.5rem;
+    }
+  </style>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('enterprise-form');
+      
+      if (form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          // Скрыть предыдущие сообщения об ошибках
+          document.querySelectorAll('.error-message').forEach(el => {
+            el.style.display = 'none';
+            el.textContent = '';
+          });
+          
+          const formData = new FormData(form);
+          const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+          
+          fetch('{% url "enterprise_create" %}', {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': csrfToken,
+              'Accept': 'application/json'
+            },
+            body: formData
+          })
+          .then(response => {
+            if (!response.ok) {
+              return response.json().then(data => {
+                throw data;
+              });
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Скрыть форму и показать сообщение об успехе
+            form.style.display = 'none';
+            document.getElementById('success-name').textContent = data.name;
+            document.getElementById('success-city').textContent = data.city;
+            document.getElementById('success-message').style.display = 'block';
+          })
+          .catch(error => {
+            // Обработка ошибок
+            if (error.detail) {
+              document.getElementById('api-error').textContent = error.detail;
+              document.getElementById('api-error').style.display = 'block';
+            } else {
+              // Показать ошибки полей
+              for (const [field, errors] of Object.entries(error)) {
+                const errorDiv = document.getElementById(`${field}-error`);
+                if (errorDiv) {
+                  errorDiv.textContent = Array.isArray(errors) ? errors.join(', ') : errors;
+                  errorDiv.style.display = 'block';
+                }
+              }
+            }
+          });
+        });
+      }
+    });
+  </script>
+{% endblock %}

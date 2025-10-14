@@ -1,12 +1,12 @@
 from django.contrib import admin
 
-from .models import Vehicle, Brand, Enterprise, Driver, DriverVehicle, Manager
+from authentication.models import Manager, CustomUser
+from .models import Vehicle, Brand, Enterprise, Driver, DriverVehicle
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.db.models import Q
 
 from .permissions import ManagerPermissionAdmin
-
 
 class ManagerInline(admin.StackedInline):
     model = Manager
@@ -56,10 +56,8 @@ class EnterpriseAdmin(ManagerPermissionAdmin):
             return qs.none()
 
     def has_add_permission(self, request):
-        # Суперпользователь может добавлять предприятия
         if request.user.is_superuser:
             return True
-        # Менеджеры не могут добавлять предприятия
         return False
 
     def has_change_permission(self, request, obj=None):
@@ -67,9 +65,8 @@ class EnterpriseAdmin(ManagerPermissionAdmin):
             return True
         try:
             if obj is not None:
-                # Проверяем, принадлежит ли предприятие менеджеру
                 return obj.managers.filter(user=request.user).exists()
-            return True  # Для списка объектов
+            return True
         except (Manager.DoesNotExist, AttributeError):
             return False
 
@@ -81,11 +78,8 @@ class VehicleAdmin(ManagerPermissionAdmin):
                     'color', 'created_at', 'get_drivers', 'get_active_driver')
 
     def get_drivers(self, obj):
-        # Получаем до 3 водителей для краткости
         drivers = obj.drivers.all()[:3]
-        # Формируем строку с именами водителей
         drivers_list = [f"{driver.last_name} {driver.first_name}" for driver in drivers]
-        # Добавляем "..." если водителей больше 3
         if obj.drivers.count() > 3:
             return ", ".join(drivers_list) + ", ..."
         return ", ".join(drivers_list) or "Нет водителей"
@@ -105,18 +99,15 @@ class VehicleAdmin(ManagerPermissionAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        # Суперпользователь видит все
         if request.user.is_superuser:
             return qs.prefetch_related('drivers')
         try:
-            # Обычный менеджер видит только автомобили своих предприятий
             manager = request.user.manager
             return qs.filter(enterprise__managers=manager).prefetch_related('drivers')
         except (Manager.DoesNotExist, AttributeError):
             return qs.none()
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        # Ограничиваем выбор предприятий только теми, что принадлежат менеджеру
         if db_field.name == "enterprise" and not request.user.is_superuser:
             try:
                 manager = request.user.manager
@@ -135,18 +126,15 @@ class DriverAdmin(ManagerPermissionAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        # Суперпользователь видит все
         if request.user.is_superuser:
             return qs
         try:
-            # Обычный менеджер видит только водителей своих предприятий
             manager = request.user.manager
             return qs.filter(enterprise__managers=manager)
         except (Manager.DoesNotExist, AttributeError):
             return qs.none()
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        # Ограничиваем выбор предприятий только теми, что принадлежат менеджеру
         if db_field.name == "enterprise" and not request.user.is_superuser:
             try:
                 manager = request.user.manager
@@ -160,11 +148,9 @@ class DriverVehicleAdmin(ManagerPermissionAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        # Суперпользователь видит все
         if request.user.is_superuser:
             return qs
         try:
-            # Обычный менеджер видит только назначения для своих предприятий
             manager = Manager.objects.filter(user=request.user).first()
             return qs.filter(
                 Q(driver__enterprise__managers=manager) &
@@ -174,7 +160,6 @@ class DriverVehicleAdmin(ManagerPermissionAdmin):
             return qs.none()
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        # Ограничиваем выбор водителей и автомобилей только теми, что принадлежат менеджеру
         if db_field.name == "driver" and not request.user.is_superuser:
             try:
                 manager = Manager.objects.filter(user=request.user).first()
@@ -195,5 +180,4 @@ admin.site.register(Vehicle, VehicleAdmin)
 admin.site.register(Driver, DriverAdmin)
 admin.site.register(DriverVehicle, DriverVehicleAdmin)
 admin.site.register(Manager, ManagerAdmin)
-admin.site.unregister(User)
-admin.site.register(User, CustomUserAdmin)
+admin.site.register(CustomUser, CustomUserAdmin)

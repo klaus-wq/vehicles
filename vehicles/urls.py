@@ -18,8 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 
-from vehicle.views import VehicleViewSet, DriverViewSet, EnterpriseViewSet, DriverVehicleViewSet
-from rest_framework.authtoken import views as token_views
+from vehicle.views import VehicleViewSet, DriverViewSet, EnterpriseViewSet, DriverVehicleViewSet, \
+    EnterprisesListViewSet, EnterpriseCreateFormView, EnterpriseCreateApiView
 
 router = routers.DefaultRouter()
 router.register(r'vehicles', VehicleViewSet)
@@ -28,8 +28,11 @@ router.register(r'enterprises', EnterpriseViewSet)
 router.register(r'active', DriverVehicleViewSet)
 
 urlpatterns = [
+    path('enterprises/', EnterprisesListViewSet.as_view(), name='enterprises_list'),
+    path('enterprises/create/', EnterpriseCreateApiView.as_view(), name='enterprise_create'),
+    path('enterprises/create/form/', EnterpriseCreateFormView.as_view(), name='enterprise_create_form'),
     path('admin/', admin.site.urls),
+    path('api/auth/', include('authentication.urls')),
     path('api/', include(router.urls)),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('api-token-auth/', token_views.obtain_auth_token),
+    path('api-auth/', include('rest_framework.urls')),
 ]

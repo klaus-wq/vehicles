@@ -290,24 +290,3 @@ class DriverVehicle(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()  # Вызываем проверку перед сохранением
         super().save(*args, **kwargs)
-
-class Manager(models.Model):
-    user = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        related_name='manager',
-        verbose_name='Пользователь'
-    )
-    enterprises = models.ManyToManyField(
-        Enterprise,
-        related_name='managers',
-        verbose_name='Предприятия'
-    )
-
-    class Meta:
-        verbose_name = 'Менеджер'
-        verbose_name_plural = 'Менеджеры'
-
-    def __str__(self):
-        enterprises_list = ", ".join([f"{enterprise.id} {enterprise.name}" for enterprise in self.enterprises.all()])
-        return f'{self.user.username}, {enterprises_list}'
