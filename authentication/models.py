@@ -6,18 +6,16 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 
 class UserManager(BaseUserManager):
-    def create_user(self, username, email, password):
+    def create_user(self, username, password):
         if not username:
             raise ValueError('The username must be set')
-        email = self.normalize_email(email) if email else None
-        user = self.model(username=username, email=email)
+        user = self.model(username=username)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, username, email, password):
-        email = self.normalize_email(email) if email else None
-        user = self.create_user(username, email, password)
+    def create_superuser(self, username, password):
+        user = self.create_user(username, password)
         user.is_staff = True
         user.is_superuser = True
         user.save(using=self._db)
@@ -25,7 +23,6 @@ class UserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=255, unique=True)
-    email = models.EmailField(unique=True, blank=True, null=True)
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     is_active = models.BooleanField(default=True)

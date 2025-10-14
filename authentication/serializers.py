@@ -13,7 +13,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['email', 'username', 'password', 'token']
+        fields = ['username', 'password', 'token']
 
     def create(self, validated_data):
         return CustomUser.objects.create_user(**validated_data)
@@ -50,7 +50,6 @@ class LoginSerializer(serializers.Serializer):
             )
 
         return {
-            'email': user.email,
             'username': user.username,
             'token': user.token
         }

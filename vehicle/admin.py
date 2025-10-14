@@ -26,7 +26,7 @@ class ManagerAdmin(admin.ModelAdmin):
 
 class CustomUserAdmin(UserAdmin):
     inlines = (ManagerInline,)
-    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'is_manager')
+    list_display = ('username', 'first_name', 'last_name', 'is_staff', 'is_manager')
     list_select_related = True
 
     def is_manager(self, user):
