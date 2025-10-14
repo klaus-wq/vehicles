@@ -47,12 +47,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         blank=True,
     )
 
-    def get_full_name(self):
-        return f"{self.first_name} {self.last_name}".strip() or self.username
-
-    def get_short_name(self):
-        return self.first_name or self.username
-
     @property
     def token(self):
         return self._generate_jwt_token()
@@ -64,6 +58,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
             'exp': int(dt.timestamp())
         }, settings.SECRET_KEY, algorithm='HS256')
         return token
+
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}".strip() or self.username
+
+    def get_short_name(self):
+        return self.first_name or self.username
 
 class Manager(models.Model):
     user = models.OneToOneField(
