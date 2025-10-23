@@ -28,7 +28,6 @@ class Tests(APITestCase):
         response = self.client.post("/api/auth/users/login/", {
             "user": {"username": "manager1", "password": "wrongpass"}
         }, format="json")
-
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_manager_access_to_other_enterprise_forbidden(self):
@@ -43,7 +42,6 @@ class Tests(APITestCase):
         manager2.enterprises.add(enterprise2)
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {manager1.user.token}")
         response = self.client.get(f"/api/enterprises/{enterprise2.id}/")
-        print(response.status_code, enterprise2.id)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_invalid_request_bad_request(self):
@@ -55,7 +53,6 @@ class Tests(APITestCase):
             "name": "Enterprise 1",
             "citty": "City 1",
         }, format="json")
-
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_delete_enterprise_with_vehicles_conflict(self):
