@@ -56,9 +56,7 @@ class EnterpriseAdmin(ManagerPermissionAdmin):
             return qs.none()
 
     def has_add_permission(self, request):
-        if request.user.is_superuser:
-            return True
-        return False
+        return request.user.is_superuser or hasattr(request.user, 'manager')
 
     def has_change_permission(self, request, obj=None):
         if request.user.is_superuser:
@@ -71,11 +69,20 @@ class EnterpriseAdmin(ManagerPermissionAdmin):
             return False
 
     def has_delete_permission(self, request, obj=None):
-        return request.user.is_superuser
+        return request.user.is_superuser or hasattr(request.user, 'manager')
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if not change:
+            if hasattr(request.user, 'manager'):
+                obj.managers.add(request.user.manager)
 
 class VehicleAdmin(ManagerPermissionAdmin):
     list_display = ('id', 'car_number', 'enterprise', 'brand', 'price', 'year', 'mileage', 'fuel_type', 'transmission',
                     'color', 'created_at', 'get_drivers', 'get_active_driver')
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser or hasattr(request.user, 'manager')
 
     def get_drivers(self, obj):
         drivers = obj.drivers.all()[:3]
@@ -124,6 +131,9 @@ class DriverAdmin(ManagerPermissionAdmin):
 
     full_name.short_description = 'ФИО'
 
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser or hasattr(request.user, 'manager')
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.is_superuser:
@@ -145,6 +155,9 @@ class DriverAdmin(ManagerPermissionAdmin):
 
 class DriverVehicleAdmin(ManagerPermissionAdmin):
     list_display = ('driver', 'vehicle', 'is_active')
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser or hasattr(request.user, 'manager')
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

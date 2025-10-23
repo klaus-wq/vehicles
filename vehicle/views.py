@@ -16,8 +16,7 @@ from vehicle.permissions import IsManagerOrReadOnly
 from vehicle.serializers import VehicleSerializer, DriverSerializer, EnterpriseSerializer, DriverVehicleSerializer
 
 def index(request):
-    return HttpResponse("Hello METANIT.COM")
-# Create your views here.
+    return HttpResponse("Hello")
 
 class VehicleViewSet(viewsets.ModelViewSet):
     queryset = Vehicle.objects.all()
@@ -71,6 +70,33 @@ class EnterpriseViewSet(viewsets.ModelViewSet):
             print(f"Ошибка получения менеджера: {e}")
             return Enterprise.objects.none()
 
+    def create(self, request, *args, **kwargs):
+        if not (request.user.is_superuser or hasattr(request.user, 'manager')):
+            return Response(
+                {"detail": "You must be a manager or superuser to create an enterprise."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        enterprise = serializer.save()
+
+        if not request.user.is_superuser and hasattr(request.user, 'manager'):
+            manager = request.user.manager
+            manager.enterprises.add(enterprise)
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def delete(self, request, *args, **kwargs):
+        if not (request.user.is_superuser or hasattr(request.user, 'manager')):
+            return Response(
+                {"detail": "У вас нет прав для удаления предприятий."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        return super().create(request, *args, **kwargs)
+
 class DriverVehicleViewSet(viewsets.ModelViewSet):
     queryset = DriverVehicle.objects.all()
     serializer_class = DriverVehicleSerializer
@@ -93,7 +119,7 @@ class EnterprisesListViewSet(LoginRequiredMixin, ListView):
             return Enterprise.objects.none()
 
 class EnterpriseCreateApiView(APIView):
-    permission_classes = [IsAuthenticated, IsManagerOrReadOnly]
+    permission_classes = [IsManagerOrReadOnly]
 
     def post(self, request, format=None):
         if not request.user.is_superuser:

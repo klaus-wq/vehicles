@@ -28,9 +28,9 @@ router.register(r'enterprises', EnterpriseViewSet)
 router.register(r'active', DriverVehicleViewSet)
 
 urlpatterns = [
-    path('enterprises/', EnterprisesListViewSet.as_view(), name='enterprises_list'),
-    path('enterprises/create/', EnterpriseCreateApiView.as_view(), name='enterprise_create'),
-    path('enterprises/create/form/', EnterpriseCreateFormView.as_view(), name='enterprise_create_form'),
+    # path('enterprises/', EnterprisesListViewSet.as_view(), name='enterprises_list'),
+    # path('enterprises/create/', EnterpriseCreateApiView.as_view(), name='enterprise_create'),
+    # path('enterprises/create/form/', EnterpriseCreateFormView.as_view(), name='enterprise_create_form'),
     path('admin/', admin.site.urls),
     path('api/auth/', include('authentication.urls')),
     path('api/', include(router.urls)),

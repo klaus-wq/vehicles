@@ -1,10 +1,12 @@
 from rest_framework import serializers
+from rest_framework.permissions import IsAuthenticated
 
 from authentication.models import Manager
 from authentication.serializers import ManagerSerializer
 from vehicle.models import Vehicle, Enterprise, Driver, DriverVehicle
 
 from vehicle.models import Brand
+from vehicle.permissions import IsManagerOrReadOnly
 
 
 class BrandSerializer(serializers.ModelSerializer):
@@ -41,7 +43,7 @@ class VehicleSerializer(serializers.ModelSerializer):
             'color',
             'created_at',
             'brand',
-            # 'enterprise',
+            'enterprise',
             'drivers',
             'active_driver'
         ]
@@ -67,7 +69,8 @@ class DriverVehicleSerializer(serializers.ModelSerializer):
 class EnterpriseSerializer(serializers.ModelSerializer):
     drivers = serializers.SerializerMethodField()
     vehicles = serializers.SerializerMethodField()
-    managers = ManagerSerializer(source='managers', many=True, read_only=True)
+    managers = serializers.SerializerMethodField()
+    # managers = ManagerSerializer(many=True, read_only=True)
     # managers = [manager['id'] for manager in ManagerSerializer(Manager.objects.all(), many=True).data]
 
     class Meta:
@@ -88,3 +91,6 @@ class EnterpriseSerializer(serializers.ModelSerializer):
 
     def get_vehicles(self, obj):
         return list(obj.vehicles.values_list('id', flat=True))
+
+    def get_managers(self, obj):
+        return list(obj.managers.values_list('id', flat=True))

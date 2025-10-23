@@ -51,6 +51,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'EXCEPTION_HANDLER': 'vehicle.exceptions.custom_exception_handler',
 }
 
 AUTH_USER_MODEL = 'authentication.CustomUser'
@@ -96,7 +97,7 @@ DATABASES = {
     # }
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'vehicles4',
+        'NAME': 'vehicles5',
         'USER': 'vehicleuser2',
         'PASSWORD': 'admin',
         'HOST': '127.0.0.1',

@@ -190,7 +190,7 @@ class Vehicle(models.Model):
     )
     enterprise = models.ForeignKey(
         Enterprise,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         verbose_name='Предприятие',
         related_name='vehicles'
     )
@@ -222,13 +222,13 @@ class Vehicle(models.Model):
 class DriverVehicle(models.Model):
     driver = models.ForeignKey(
         Driver,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         verbose_name='Водитель',
         related_name='driver_vehicles'
     )
     vehicle = models.ForeignKey(
         Vehicle,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         verbose_name='Автомобиль',
         related_name='vehicle_drivers'
     )

@@ -2,31 +2,10 @@ from vehicle.models import Enterprise
 import jwt
 from datetime import datetime, timedelta, timezone
 from django.conf import settings
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import PermissionsMixin, AbstractUser, UserManager
 from django.db import models
 
-class UserManager(BaseUserManager):
-    def create_user(self, username, password):
-        if not username:
-            raise ValueError('The username must be set')
-        user = self.model(username=username)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
-
-    def create_superuser(self, username, password):
-        user = self.create_user(username, password)
-        user.is_staff = True
-        user.is_superuser = True
-        user.save(using=self._db)
-        return user
-
-class CustomUser(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(max_length=255, unique=True)
-    first_name = models.CharField(max_length=150, blank=True)
-    last_name = models.CharField(max_length=150, blank=True)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
+class CustomUser(AbstractUser, PermissionsMixin):
     created_at = models.DateTimeField(auto_now_add=True)
 
     USERNAME_FIELD = 'username'

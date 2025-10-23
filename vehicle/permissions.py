@@ -1,4 +1,4 @@
-from rest_framework import permissions
+from rest_framework import permissions, exceptions
 
 from authentication.models import Manager
 from vehicle.models import Enterprise
@@ -23,9 +23,16 @@ class ManagerPermissionAdmin(admin.ModelAdmin):
 class IsManagerOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
-            return True
-
-        return request.user and request.user.is_authenticated
+            return request.user.is_authenticated and (
+                    request.user.is_superuser or hasattr(request.user, 'manager')
+            )
+        return request.user.is_authenticated and (
+                request.user.is_superuser or hasattr(request.user, 'manager')
+        )
+        # if request.method in permissions.SAFE_METHODS:
+        #     return True
+        #
+        # return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
         if request.user.is_superuser:
@@ -38,7 +45,7 @@ class IsManagerOrReadOnly(permissions.BasePermission):
             manager = request.user.manager
             if hasattr(obj, 'enterprise'):
                 return obj.enterprise in manager.enterprises.all()
-            elif isinstance(obj, Enterprise):
+            elif obj.__class__.__name__ == 'Enterprise':
                 return obj in manager.enterprises.all()
             return False
         except (Manager.DoesNotExist, AttributeError):

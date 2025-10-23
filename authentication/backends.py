@@ -1,6 +1,8 @@
 import jwt
 from django.conf import settings
-from rest_framework import authentication, exceptions
+from rest_framework import authentication, exceptions, status
+from rest_framework.response import Response
+
 from .models import CustomUser
 
 class JWTAuthentication(authentication.BaseAuthentication):
@@ -11,13 +13,13 @@ class JWTAuthentication(authentication.BaseAuthentication):
         auth_header = authentication.get_authorization_header(request).split()
 
         if not auth_header or len(auth_header) != 2:
-            return None
+            raise exceptions.AuthenticationFailed('Authentication credentials were not provided.')
 
         prefix = auth_header[0].decode('utf-8')
         token = auth_header[1].decode('utf-8')
 
         if prefix.lower() != self.authentication_header_prefix.lower():
-            return None
+            raise exceptions.AuthenticationFailed('Invalid token prefix.')
 
         return self._authenticate_credentials(request, token)
 
