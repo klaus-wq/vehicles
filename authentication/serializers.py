@@ -29,24 +29,24 @@ class LoginSerializer(serializers.Serializer):
         password = data.get('password', None)
 
         if username is None:
-            raise serializers.AuthenticationFailed(
+            raise serializers.ValidationError(
                 'An username is required to log in.'
             )
 
         if password is None:
-            raise serializers.AuthenticationFailed(
+            raise serializers.ValidationError(
                 'A password is required to log in.'
             )
 
         user = authenticate(username=username, password=password)
 
         if user is None:
-            raise serializers.AuthenticationFailed(
+            raise AuthenticationFailed(
                 'Invalid username or password.'
             )
 
         if not user.is_active:
-            raise serializers.AuthenticationFailed(
+            raise AuthenticationFailed(
                 'This user has been deactivated.'
             )
 

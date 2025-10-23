@@ -1,15 +1,20 @@
-from rest_framework import authentication, exceptions
-from django.conf import settings
 import jwt
-from authentication.models import CustomUser
+from django.conf import settings
+from rest_framework import authentication, exceptions
+from .models import CustomUser
 
 class JWTAuthentication(authentication.BaseAuthentication):
     authentication_header_prefix = 'Token'
 
     def authenticate(self, request):
+        # if request.path in ['/api/auth/users/login/', '/api/auth/users/']:
+        #     return None
+
+        request.user = None
         auth_header = authentication.get_authorization_header(request).split()
+
         if not auth_header or len(auth_header) != 2:
-            raise exceptions.AuthenticationFailed(
+            raise exceptions.NotAuthenticated(
                 'Authentication credentials were not provided.'
             )
 
@@ -17,7 +22,9 @@ class JWTAuthentication(authentication.BaseAuthentication):
         token = auth_header[1].decode('utf-8')
 
         if prefix.lower() != self.authentication_header_prefix.lower():
-            raise exceptions.AuthenticationFailed('Invalid token prefix.')
+            raise exceptions.AuthenticationFailed(
+                'Authentication failed.'
+            )
 
         return self._authenticate_credentials(request, token)
 
@@ -25,21 +32,16 @@ class JWTAuthentication(authentication.BaseAuthentication):
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
-            raise exceptions.AuthenticationFailed('Token has expired.')
-        except jwt.InvalidTokenError:
-            raise exceptions.AuthenticationFailed('Invalid token.')
+            raise exceptions.AuthenticationFailed('Токен истёк.')
+        except Exception:
+            raise exceptions.AuthenticationFailed('Неверный токен.')
 
         try:
             user = CustomUser.objects.get(pk=payload['id'])
         except CustomUser.DoesNotExist:
-            raise exceptions.AuthenticationFailed('User not found.')
+            raise exceptions.AuthenticationFailed('Пользователь не найден.')
 
         if not user.is_active:
-            raise exceptions.AuthenticationFailed('User is deactivated.')
-
-        if not (user.is_superuser or hasattr(user, 'manager')):
-            raise exceptions.AuthenticationFailed(
-                'User must be a manager or superuser to access this API.'
-            )
+            raise exceptions.AuthenticationFailed('Пользователь деактивирован.')
 
         return (user, token)

@@ -6,7 +6,8 @@ from rest_framework.views import APIView
 from authentication.serializers import RegistrationSerializer, LoginSerializer
 
 class RegistrationAPIView(APIView):
-    permission_classes = (AllowAny,)
+    authentication_classes = []
+    permission_classes = [AllowAny]
     serializer_class = RegistrationSerializer
 
     def post(self, request):
@@ -19,7 +20,8 @@ class RegistrationAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class LoginAPIView(APIView):
-    permission_classes = (AllowAny,)
+    authentication_classes = []
+    permission_classes = [AllowAny]
     serializer_class = LoginSerializer
 
     def post(self, request):

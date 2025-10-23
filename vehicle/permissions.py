@@ -22,46 +22,27 @@ class ManagerPermissionAdmin(admin.ModelAdmin):
 
 class IsManagerOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
-        # Разрешить всем аутентифицированным пользователям
-        return request.user.is_authenticated
+        if request.method in permissions.SAFE_METHODS:
+            return request.user.is_authenticated and (
+                    request.user.is_superuser or hasattr(request.user, 'manager')
+            )
+        return request.user.is_authenticated and (
+                request.user.is_superuser or hasattr(request.user, 'manager')
+        )
 
     def has_object_permission(self, request, view, obj):
         if request.user.is_superuser:
             return True
-        if not hasattr(request.user, 'manager'):
+
+        if not request.user.is_authenticated:
             return False
-        manager = request.user.manager
-        if hasattr(obj, 'enterprise'):
-            return obj.enterprise in manager.enterprises.all()
-        if isinstance(obj, Enterprise):
-            return obj in manager.enterprises.all()
-        return False
-    # def has_permission(self, request, view):
-    #     if request.method in permissions.SAFE_METHODS:
-    #         return request.user.is_authenticated and (
-    #                 request.user.is_superuser or hasattr(request.user, 'manager')
-    #         )
-    #     return request.user.is_authenticated and (
-    #             request.user.is_superuser or hasattr(request.user, 'manager')
-    #     )
-    #     # if request.method in permissions.SAFE_METHODS:
-    #     #     return True
-    #     #
-    #     # return request.user and request.user.is_authenticated
-    #
-    # def has_object_permission(self, request, view, obj):
-    #     if request.user.is_superuser:
-    #         return True
-    #
-    #     if not request.user.is_authenticated:
-    #         return False
-    #
-    #     try:
-    #         manager = request.user.manager
-    #         if hasattr(obj, 'enterprise'):
-    #             return obj.enterprise in manager.enterprises.all()
-    #         elif obj.__class__.__name__ == 'Enterprise':
-    #             return obj in manager.enterprises.all()
-    #         return False
-    #     except (Manager.DoesNotExist, AttributeError):
-    #         return False
+
+        try:
+            manager = request.user.manager
+            if hasattr(obj, 'enterprise'):
+                return obj.enterprise in manager.enterprises.all()
+            elif obj.__class__.__name__ == 'Enterprise':
+                return obj in manager.enterprises.all()
+            return False
+        except (Manager.DoesNotExist, AttributeError):
+            return False
