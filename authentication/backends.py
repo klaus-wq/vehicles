@@ -1,19 +1,17 @@
-import jwt
+from rest_framework import authentication, exceptions
 from django.conf import settings
-from rest_framework import authentication, exceptions, status
-from rest_framework.response import Response
-
-from .models import CustomUser
+import jwt
+from authentication.models import CustomUser
 
 class JWTAuthentication(authentication.BaseAuthentication):
     authentication_header_prefix = 'Token'
 
     def authenticate(self, request):
-        request.user = None
         auth_header = authentication.get_authorization_header(request).split()
-
         if not auth_header or len(auth_header) != 2:
-            raise exceptions.AuthenticationFailed('Authentication credentials were not provided.')
+            raise exceptions.AuthenticationFailed(
+                'Authentication credentials were not provided.'
+            )
 
         prefix = auth_header[0].decode('utf-8')
         token = auth_header[1].decode('utf-8')
@@ -27,16 +25,21 @@ class JWTAuthentication(authentication.BaseAuthentication):
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
-            raise exceptions.AuthenticationFailed('Токен истёк.')
-        except Exception:
-            raise exceptions.AuthenticationFailed('Неверный токен.')
+            raise exceptions.AuthenticationFailed('Token has expired.')
+        except jwt.InvalidTokenError:
+            raise exceptions.AuthenticationFailed('Invalid token.')
 
         try:
             user = CustomUser.objects.get(pk=payload['id'])
         except CustomUser.DoesNotExist:
-            raise exceptions.AuthenticationFailed('Пользователь не найден.')
+            raise exceptions.AuthenticationFailed('User not found.')
 
         if not user.is_active:
-            raise exceptions.AuthenticationFailed('Пользователь деактивирован.')
+            raise exceptions.AuthenticationFailed('User is deactivated.')
+
+        if not (user.is_superuser or hasattr(user, 'manager')):
+            raise exceptions.AuthenticationFailed(
+                'User must be a manager or superuser to access this API.'
+            )
 
         return (user, token)

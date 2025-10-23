@@ -19,7 +19,7 @@ from django.urls import path, include
 from rest_framework import routers
 
 from vehicle.views import VehicleViewSet, DriverViewSet, EnterpriseViewSet, DriverVehicleViewSet, \
-    EnterprisesListViewSet, EnterpriseCreateFormView, EnterpriseCreateApiView
+    EnterprisesListViewSet, EnterpriseCreateFormView, EnterpriseCreateApiView, TestView
 
 router = routers.DefaultRouter()
 router.register(r'vehicles', VehicleViewSet)
@@ -35,4 +35,5 @@ urlpatterns = [
     path('api/auth/', include('authentication.urls')),
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),
+    path('test/', TestView.as_view()),
 ]

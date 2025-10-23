@@ -5,6 +5,8 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 from django.views.generic import ListView, TemplateView
 from rest_framework import viewsets, status
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
@@ -17,6 +19,10 @@ from vehicle.serializers import VehicleSerializer, DriverSerializer, EnterpriseS
 
 def index(request):
     return HttpResponse("Hello")
+
+class TestView(APIView):
+    def get(self, request):
+        return Response({"user": str(request.user)})
 
 class VehicleViewSet(viewsets.ModelViewSet):
     queryset = Vehicle.objects.all()
@@ -70,10 +76,26 @@ class EnterpriseViewSet(viewsets.ModelViewSet):
             print(f"Ошибка получения менеджера: {e}")
             return Enterprise.objects.none()
 
+    def get_object(self):
+        obj = get_object_or_404(Enterprise, pk=self.kwargs['pk'])
+
+        user = self.request.user
+        if user.is_superuser:
+            return obj
+
+        if not hasattr(user, 'manager'):
+            raise PermissionDenied("Доступ запрещён.")
+
+        manager = user.manager
+        if obj not in manager.enterprises.all():
+            raise PermissionDenied("Доступ запрещён.")
+
+        return obj
+
     def create(self, request, *args, **kwargs):
         if not (request.user.is_superuser or hasattr(request.user, 'manager')):
             return Response(
-                {"detail": "You must be a manager or superuser to create an enterprise."},
+                {"detail": "Нужно быть менеджером или админом, чтобы создать предприятия."},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -96,6 +118,23 @@ class EnterpriseViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         return super().create(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        enterprise = self.get_object()
+
+        if enterprise.managers.count() > 1:
+            return Response(
+                {"detail": "Нельзя удалить предприятие, видимое другим менеджерам."},
+                status=status.HTTP_409_CONFLICT
+            )
+
+        if enterprise.vehicles.exists() or enterprise.drivers.exists():
+            return Response(
+                {"detail": "Нельзя удалить предприятие с автомобилями или водителями."},
+                status=status.HTTP_409_CONFLICT
+            )
+
+        return super().destroy(request, *args, **kwargs)
 
 class DriverVehicleViewSet(viewsets.ModelViewSet):
     queryset = DriverVehicle.objects.all()
