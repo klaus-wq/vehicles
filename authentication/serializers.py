@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from authentication.models import Manager, CustomUser
 from django.contrib.auth import authenticate
+from rest_framework.exceptions import AuthenticationFailed
 
 class RegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
@@ -28,24 +29,24 @@ class LoginSerializer(serializers.Serializer):
         password = data.get('password', None)
 
         if username is None:
-            raise serializers.ValidationError(
+            raise serializers.AuthenticationFailed(
                 'An username is required to log in.'
             )
 
         if password is None:
-            raise serializers.ValidationError(
+            raise serializers.AuthenticationFailed(
                 'A password is required to log in.'
             )
 
         user = authenticate(username=username, password=password)
 
         if user is None:
-            raise serializers.ValidationError(
+            raise serializers.AuthenticationFailed(
                 'Invalid username or password.'
             )
 
         if not user.is_active:
-            raise serializers.ValidationError(
+            raise serializers.AuthenticationFailed(
                 'This user has been deactivated.'
             )
 

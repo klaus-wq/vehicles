@@ -25,7 +25,7 @@ class Tests(APITestCase):
     def test_login_invalid_password_unauthorized(self):
         """3. Менеджер: правильный логин, неверный пароль — 401 Unauthorized"""
         User.objects.create_user(username="manager1", password="manager1")
-        response = self.client.post("/api/auth/login/", {
+        response = self.client.post("/api/auth/users/login/", {
             "user": {"username": "manager1", "password": "wrongpass"}
         }, format="json")
 
