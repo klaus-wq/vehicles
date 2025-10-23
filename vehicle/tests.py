@@ -31,7 +31,7 @@ class Tests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_manager_access_to_other_enterprise_forbidden(self):
-        """4. Менеджер пытается получить доступ к чужому ресурсу — 403 Forbidden"""
+        """4. Менеджер пытается получить доступ к чужому предприятию — 403 Forbidden"""
         user1 = User.objects.create_user(username="manager1", password="manager1")
         user2 = User.objects.create_user(username="manager2", password="manager2")
         enterprise1 = Enterprise.objects.create(name="Enterprise 1", city="City 1")
