@@ -10,7 +10,7 @@ fake = Faker('ru_RU')
 
 
 class Command(BaseCommand):
-    help = 'Генерация машин, водителей и назначений для предприятий.'
+    help = 'Генерация данных для предприятий.'
 
     def add_arguments(self, parser):
         parser.add_argument(
