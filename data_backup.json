@@ -1,0 +1,1172 @@
+[
+{
+  "model": "admin.logentry",
+  "pk": 1,
+  "fields": {
+    "action_time": "2025-10-16T07:59:27.503Z",
+    "user": 1,
+    "content_type": 11,
+    "object_id": "2",
+    "object_repr": "manager1",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 2,
+  "fields": {
+    "action_time": "2025-10-16T08:11:19.625Z",
+    "user": 1,
+    "content_type": 11,
+    "object_id": "2",
+    "object_repr": "manager1",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Staff status\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 3,
+  "fields": {
+    "action_time": "2025-10-16T08:15:37.576Z",
+    "user": 1,
+    "content_type": 8,
+    "object_id": "1",
+    "object_repr": "1, Рога и Копыта, Москва, Краснопрудная, +7 495 02-55-252",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 4,
+  "fields": {
+    "action_time": "2025-10-16T08:15:50.531Z",
+    "user": 1,
+    "content_type": 12,
+    "object_id": "1",
+    "object_repr": "manager1, 1 Рога и Копыта",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 5,
+  "fields": {
+    "action_time": "2025-10-16T08:28:32.717Z",
+    "user": 1,
+    "content_type": 7,
+    "object_id": "1",
+    "object_repr": "1, Иванов Иван, Рога и Копыта, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 6,
+  "fields": {
+    "action_time": "2025-10-16T08:28:54.859Z",
+    "user": 1,
+    "content_type": 6,
+    "object_id": "1",
+    "object_repr": "1, BMW, Легковой, 78 л., 1000 кг., 5",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 7,
+  "fields": {
+    "action_time": "2025-10-16T08:29:26.046Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "1",
+    "object_repr": "1, ЕЕ453РН54, Рога и Копыта, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 8,
+  "fields": {
+    "action_time": "2025-10-16T08:29:34.443Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "1",
+    "object_repr": "1, Иван Иванов (дополнительный) → 1, ЕЕ453РН54 ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 9,
+  "fields": {
+    "action_time": "2025-10-16T11:10:32.347Z",
+    "user": 1,
+    "content_type": 11,
+    "object_id": "3",
+    "object_repr": "test",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 10,
+  "fields": {
+    "action_time": "2025-10-16T11:11:09.018Z",
+    "user": 1,
+    "content_type": 11,
+    "object_id": "3",
+    "object_repr": "test",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Staff status\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 11,
+  "fields": {
+    "action_time": "2025-10-19T21:07:08.279Z",
+    "user": 1,
+    "content_type": 8,
+    "object_id": "5",
+    "object_repr": "5, Авто и машинки, Москва, ул. Новая, д. 1, +7 (383) 123-45-67",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 12,
+  "fields": {
+    "action_time": "2025-10-19T21:07:08.279Z",
+    "user": 1,
+    "content_type": 8,
+    "object_id": "4",
+    "object_repr": "4, Авто и машинки, Москва, ул. Новая, д. 1, +7 (383) 123-45-67",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 13,
+  "fields": {
+    "action_time": "2025-10-19T21:07:16.398Z",
+    "user": 1,
+    "content_type": 8,
+    "object_id": "2",
+    "object_repr": "2, Русское авто, Москва, ул. Новая, д. 1, +7 (383) 123-45-67",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"\\u041d\\u0430\\u0437\\u0432\\u0430\\u043d\\u0438\\u0435 \\u043f\\u0440\\u0435\\u0434\\u043f\\u0440\\u0438\\u044f\\u0442\\u0438\\u044f\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 14,
+  "fields": {
+    "action_time": "2025-10-19T21:07:27.709Z",
+    "user": 1,
+    "content_type": 8,
+    "object_id": "3",
+    "object_repr": "3, Автодом, Москва, ул. Новая, д. 1, +7 (383) 123-45-67",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"\\u041d\\u0430\\u0437\\u0432\\u0430\\u043d\\u0438\\u0435 \\u043f\\u0440\\u0435\\u0434\\u043f\\u0440\\u0438\\u044f\\u0442\\u0438\\u044f\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 15,
+  "fields": {
+    "action_time": "2025-10-19T21:07:58.179Z",
+    "user": 1,
+    "content_type": 7,
+    "object_id": "2",
+    "object_repr": "2, Сергеев Сергей, Рога и Копыта, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 16,
+  "fields": {
+    "action_time": "2025-10-19T21:08:21.586Z",
+    "user": 1,
+    "content_type": 7,
+    "object_id": "3",
+    "object_repr": "3, Кузьмов Семён, Рога и Копыта, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 17,
+  "fields": {
+    "action_time": "2025-10-19T21:08:39.875Z",
+    "user": 1,
+    "content_type": 7,
+    "object_id": "4",
+    "object_repr": "4, Андреев Кирилл, Русское авто, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 18,
+  "fields": {
+    "action_time": "2025-10-19T21:09:05.887Z",
+    "user": 1,
+    "content_type": 7,
+    "object_id": "5",
+    "object_repr": "5, Петров Юрий, Русское авто, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 19,
+  "fields": {
+    "action_time": "2025-10-19T21:09:38.257Z",
+    "user": 1,
+    "content_type": 7,
+    "object_id": "6",
+    "object_repr": "6, Цирман Дмитрий, Русское авто, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 20,
+  "fields": {
+    "action_time": "2025-10-19T21:09:58.887Z",
+    "user": 1,
+    "content_type": 7,
+    "object_id": "7",
+    "object_repr": "7, Кириллов Андрей, Автодом, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 21,
+  "fields": {
+    "action_time": "2025-10-19T21:10:20.935Z",
+    "user": 1,
+    "content_type": 7,
+    "object_id": "8",
+    "object_repr": "8, Денисов Еким, Автодом, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 22,
+  "fields": {
+    "action_time": "2025-10-19T21:10:47.393Z",
+    "user": 1,
+    "content_type": 7,
+    "object_id": "9",
+    "object_repr": "9, Ирман Тимур, Автодом, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 23,
+  "fields": {
+    "action_time": "2025-10-19T21:12:11.499Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "2",
+    "object_repr": "2, ПЕ345РИ65, Русское авто, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 24,
+  "fields": {
+    "action_time": "2025-10-19T21:12:32.968Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "3",
+    "object_repr": "3, Н234ПП, Автодом, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 25,
+  "fields": {
+    "action_time": "2025-10-19T21:12:44.009Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "2",
+    "object_repr": "2, ПЕ345РИ65, Русское авто, ",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"\\u0421\\u0442\\u043e\\u0438\\u043c\\u043e\\u0441\\u0442\\u044c, \\u20bd\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 26,
+  "fields": {
+    "action_time": "2025-10-19T21:13:04.765Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "2",
+    "object_repr": "3, Семён Кузьмов (основной) → 1, ЕЕ453РН54 ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 27,
+  "fields": {
+    "action_time": "2025-10-19T21:13:10.663Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "3",
+    "object_repr": "4, Кирилл Андреев (дополнительный) → 2, ПЕ345РИ65 ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 28,
+  "fields": {
+    "action_time": "2025-10-19T21:13:16.853Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "4",
+    "object_repr": "7, Андрей Кириллов (дополнительный) → 3, Н234ПП ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 29,
+  "fields": {
+    "action_time": "2025-10-19T21:13:27.545Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "5",
+    "object_repr": "6, Дмитрий Цирман (основной) → 2, ПЕ345РИ65 ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 30,
+  "fields": {
+    "action_time": "2025-10-19T21:20:44.458Z",
+    "user": 1,
+    "content_type": 11,
+    "object_id": "4",
+    "object_repr": "manager2",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 31,
+  "fields": {
+    "action_time": "2025-10-19T21:21:01.365Z",
+    "user": 1,
+    "content_type": 12,
+    "object_id": "2",
+    "object_repr": "manager2, 2 Русское авто, 3 Автодом",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 32,
+  "fields": {
+    "action_time": "2025-10-19T21:21:09.691Z",
+    "user": 1,
+    "content_type": 12,
+    "object_id": "1",
+    "object_repr": "manager1, 1 Рога и Копыта, 2 Русское авто",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"\\u041f\\u0440\\u0435\\u0434\\u043f\\u0440\\u0438\\u044f\\u0442\\u0438\\u044f\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 33,
+  "fields": {
+    "action_time": "2025-10-19T21:21:42.080Z",
+    "user": 2,
+    "content_type": 8,
+    "object_id": "6",
+    "object_repr": "6, Тест, Москва, Адрес, 45634",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 34,
+  "fields": {
+    "action_time": "2025-10-19T21:41:58.913Z",
+    "user": 2,
+    "content_type": 8,
+    "object_id": "7",
+    "object_repr": "7, Тест1, Москва, Адрес, 34534",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 35,
+  "fields": {
+    "action_time": "2025-10-19T22:10:41.932Z",
+    "user": 2,
+    "content_type": 7,
+    "object_id": "10",
+    "object_repr": "10, ц45 235, Тест1, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 36,
+  "fields": {
+    "action_time": "2025-10-19T22:11:01.186Z",
+    "user": 2,
+    "content_type": 10,
+    "object_id": "8",
+    "object_repr": "8, цуеце, Тест1, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 37,
+  "fields": {
+    "action_time": "2025-10-19T22:11:10.353Z",
+    "user": 2,
+    "content_type": 9,
+    "object_id": "6",
+    "object_repr": "10, 235 ц45 (дополнительный) → 8, цуеце ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 38,
+  "fields": {
+    "action_time": "2025-10-19T22:11:28.388Z",
+    "user": 1,
+    "content_type": 12,
+    "object_id": "2",
+    "object_repr": "manager2, 2 Русское авто, 3 Автодом, 6 Тест, 7 Тест1",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"\\u041f\\u0440\\u0435\\u0434\\u043f\\u0440\\u0438\\u044f\\u0442\\u0438\\u044f\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 39,
+  "fields": {
+    "action_time": "2025-10-19T22:13:51.420Z",
+    "user": 2,
+    "content_type": 8,
+    "object_id": "7",
+    "object_repr": "7, Тест1, Москва, Адрес, 34534",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 40,
+  "fields": {
+    "action_time": "2025-10-19T22:19:41.815Z",
+    "user": 2,
+    "content_type": 8,
+    "object_id": "12",
+    "object_repr": "12, Авто и машинки, Москва, ул. Новая, д. 1, +7 (383) 123-45-67",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 41,
+  "fields": {
+    "action_time": "2025-10-19T22:19:41.815Z",
+    "user": 2,
+    "content_type": 8,
+    "object_id": "11",
+    "object_repr": "11, Авто и машинки, Москва, ул. Новая, д. 1, +7 (383) 123-45-67",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 42,
+  "fields": {
+    "action_time": "2025-10-19T22:19:41.815Z",
+    "user": 2,
+    "content_type": 8,
+    "object_id": "10",
+    "object_repr": "10, Авто и машинки, Москва, ул. Новая, д. 1, +7 (383) 123-45-67",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 43,
+  "fields": {
+    "action_time": "2025-10-19T22:19:41.815Z",
+    "user": 2,
+    "content_type": 8,
+    "object_id": "8",
+    "object_repr": "8, Авто и машинки, Москва, ул. Новая, д. 1, +7 (383) 123-45-67",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 44,
+  "fields": {
+    "action_time": "2025-10-19T22:19:56.776Z",
+    "user": 2,
+    "content_type": 10,
+    "object_id": "9",
+    "object_repr": "9, A123BC77, Рога и Копыта, ",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 45,
+  "fields": {
+    "action_time": "2025-10-19T22:22:26.820Z",
+    "user": 2,
+    "content_type": 8,
+    "object_id": "13",
+    "object_repr": "13, Авто и машинки, Москва, ул. Новая, д. 1, +7 (383) 123-45-67",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 46,
+  "fields": {
+    "action_time": "2025-10-19T22:25:42.924Z",
+    "user": 2,
+    "content_type": 10,
+    "object_id": "10",
+    "object_repr": "10, A123BC77, Рога и Копыта, ",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 47,
+  "fields": {
+    "action_time": "2025-10-20T08:01:35.412Z",
+    "user": 1,
+    "content_type": 11,
+    "object_id": "3",
+    "object_repr": "test",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 48,
+  "fields": {
+    "action_time": "2025-10-20T08:01:53.331Z",
+    "user": 1,
+    "content_type": 11,
+    "object_id": "5",
+    "object_repr": "test",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 49,
+  "fields": {
+    "action_time": "2025-10-20T12:25:58.636Z",
+    "user": 2,
+    "content_type": 10,
+    "object_id": "12",
+    "object_repr": "12, ЕЕ453РН54, Рога и Копыта, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 50,
+  "fields": {
+    "action_time": "2025-10-20T12:26:10.073Z",
+    "user": 2,
+    "content_type": 9,
+    "object_id": "7",
+    "object_repr": "1, Иван Иванов (дополнительный) → 12, ЕЕ453РН54 ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 51,
+  "fields": {
+    "action_time": "2025-10-20T12:27:16.423Z",
+    "user": 2,
+    "content_type": 10,
+    "object_id": "13",
+    "object_repr": "13, ЕЕ453РН54, Рога и Копыта, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 52,
+  "fields": {
+    "action_time": "2025-10-20T12:27:25.082Z",
+    "user": 2,
+    "content_type": 9,
+    "object_id": "8",
+    "object_repr": "1, Иван Иванов (дополнительный) → 13, ЕЕ453РН54 ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 53,
+  "fields": {
+    "action_time": "2025-10-20T12:36:26.579Z",
+    "user": 2,
+    "content_type": 10,
+    "object_id": "14",
+    "object_repr": "14, ЕЕ453РН54, Рога и Копыта, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 54,
+  "fields": {
+    "action_time": "2025-10-20T12:36:32.430Z",
+    "user": 2,
+    "content_type": 9,
+    "object_id": "9",
+    "object_repr": "1, Иван Иванов (дополнительный) → 14, ЕЕ453РН54 ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 55,
+  "fields": {
+    "action_time": "2025-10-21T10:02:27.163Z",
+    "user": 2,
+    "content_type": 8,
+    "object_id": "15",
+    "object_repr": "15, Тест, ch, cfg, 4567567",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 56,
+  "fields": {
+    "action_time": "2025-10-21T10:02:42.429Z",
+    "user": 1,
+    "content_type": 12,
+    "object_id": "2",
+    "object_repr": "manager2, 2 Русское авто, 3 Автодом, 6 Тест, 15 Тест",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"\\u041f\\u0440\\u0435\\u0434\\u043f\\u0440\\u0438\\u044f\\u0442\\u0438\\u044f\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 57,
+  "fields": {
+    "action_time": "2025-10-28T07:40:13.330Z",
+    "user": 1,
+    "content_type": 7,
+    "object_id": "11",
+    "object_repr": "11, Андреев Дмитрий, Рога и Копыта, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 58,
+  "fields": {
+    "action_time": "2025-10-28T07:40:25.272Z",
+    "user": 1,
+    "content_type": 7,
+    "object_id": "12",
+    "object_repr": "12, Кузьмов Еким, Русское авто, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 59,
+  "fields": {
+    "action_time": "2025-10-28T07:40:40.824Z",
+    "user": 1,
+    "content_type": 7,
+    "object_id": "13",
+    "object_repr": "13, Ирман Кирилл, Автодом, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 60,
+  "fields": {
+    "action_time": "2025-10-28T07:41:06.818Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "15",
+    "object_repr": "15, Е456АП, Рога и Копыта, ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 61,
+  "fields": {
+    "action_time": "2025-10-28T07:41:14.112Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "10",
+    "object_repr": "11, Дмитрий Андреев (дополнительный) → 14, ЕЕ453РН54 ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 62,
+  "fields": {
+    "action_time": "2025-10-28T07:41:23.743Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "11",
+    "object_repr": "11, Дмитрий Андреев (основной) → 15, Е456АП ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 63,
+  "fields": {
+    "action_time": "2025-10-28T07:41:39.235Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "12",
+    "object_repr": "13, Кирилл Ирман (дополнительный) → 3, Н234ПП ",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "53lb1uw3r51iras93ey8m1d2bhr5o21r",
+  "fields": {
+    "session_data": ".eJxVjDsOwjAQBe_iGln-rO0NJX3OYK1_OIAcKU4qxN1JpBTQvpl5b-ZpW6vfel78lNiVSXb53QLFZ24HSA9q95nHua3LFPih8JN2Ps4pv26n-3dQqde91igKqpQpGqcsSmmCVGQFFECjBzBZYnA26uJMMiRoJzhoBAoALlj2-QK-zjbo:1vDcDJ:spqogMVRyZx4rajaIR6MKsYqPxYdMwQQjHAf1kYi5zQ",
+    "expire_date": "2025-11-11T05:25:45.471Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "87tk3c7f1mng0iaz3kg3cuyuxv52l3o8",
+  "fields": {
+    "session_data": ".eJxVjDsOwjAQBe_iGln-rO0NJX3OYK1_OIAcKU4qxN1JpBTQvpl5b-ZpW6vfel78lNiVSXb53QLFZ24HSA9q95nHua3LFPih8JN2Ps4pv26n-3dQqde91igKqpQpGqcsSmmCVGQFFECjBzBZYnA26uJMMiRoJzhoBAoALlj2-QK-zjbo:1vD5Xh:xqzojTthkiA2QdECwSZTeBE2XEEJxbMKM9f5pL9lp3Y",
+    "expire_date": "2025-11-09T18:32:37.283Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "t64cjzdxgrolhafc971dpw7gwn7iowx4",
+  "fields": {
+    "session_data": ".eJxVjDsOwjAQBe_iGln-rO0NJX3OYK1_OIAcKU4qxN1JpBTQvpl5b-ZpW6vfel78lNiVSXb53QLFZ24HSA9q95nHua3LFPih8JN2Ps4pv26n-3dQqde91igKqpQpGqcsSmmCVGQFFECjBzBZYnA26uJMMiRoJzhoBAoALlj2-QK-zjbo:1vDf2f:wgS58mYVO7Wcpa2E26CgJf0PLLlej0gXBLu24_KJZQI",
+    "expire_date": "2025-11-11T08:26:57.981Z"
+  }
+},
+{
+  "model": "vehicle.enterprise",
+  "pk": 1,
+  "fields": {
+    "name": "Рога и Копыта",
+    "city": "Москва",
+    "address": "Краснопрудная",
+    "phone": "+7 495 02-55-252"
+  }
+},
+{
+  "model": "vehicle.enterprise",
+  "pk": 2,
+  "fields": {
+    "name": "Русское авто",
+    "city": "Москва",
+    "address": "ул. Новая, д. 1",
+    "phone": "+7 (383) 123-45-67"
+  }
+},
+{
+  "model": "vehicle.enterprise",
+  "pk": 3,
+  "fields": {
+    "name": "Автодом",
+    "city": "Москва",
+    "address": "ул. Новая, д. 1",
+    "phone": "+7 (383) 123-45-67"
+  }
+},
+{
+  "model": "vehicle.enterprise",
+  "pk": 6,
+  "fields": {
+    "name": "Тест",
+    "city": "Москва",
+    "address": "Адрес",
+    "phone": "45634"
+  }
+},
+{
+  "model": "vehicle.enterprise",
+  "pk": 15,
+  "fields": {
+    "name": "Тест",
+    "city": "ch",
+    "address": "cfg",
+    "phone": "4567567"
+  }
+},
+{
+  "model": "vehicle.driver",
+  "pk": 1,
+  "fields": {
+    "enterprise": 1,
+    "first_name": "Иван",
+    "last_name": "Иванов",
+    "license_number": "123456789",
+    "salary": "50000.00"
+  }
+},
+{
+  "model": "vehicle.driver",
+  "pk": 2,
+  "fields": {
+    "enterprise": 1,
+    "first_name": "Сергей",
+    "last_name": "Сергеев",
+    "license_number": "123456780",
+    "salary": "50000.00"
+  }
+},
+{
+  "model": "vehicle.driver",
+  "pk": 3,
+  "fields": {
+    "enterprise": 1,
+    "first_name": "Семён",
+    "last_name": "Кузьмов",
+    "license_number": "123453546",
+    "salary": "50000.00"
+  }
+},
+{
+  "model": "vehicle.driver",
+  "pk": 4,
+  "fields": {
+    "enterprise": 2,
+    "first_name": "Кирилл",
+    "last_name": "Андреев",
+    "license_number": "342563465",
+    "salary": "50000.00"
+  }
+},
+{
+  "model": "vehicle.driver",
+  "pk": 5,
+  "fields": {
+    "enterprise": 2,
+    "first_name": "Юрий",
+    "last_name": "Петров",
+    "license_number": "237594873",
+    "salary": "50000.00"
+  }
+},
+{
+  "model": "vehicle.driver",
+  "pk": 6,
+  "fields": {
+    "enterprise": 2,
+    "first_name": "Дмитрий",
+    "last_name": "Цирман",
+    "license_number": "476385467",
+    "salary": "50000.00"
+  }
+},
+{
+  "model": "vehicle.driver",
+  "pk": 7,
+  "fields": {
+    "enterprise": 3,
+    "first_name": "Андрей",
+    "last_name": "Кириллов",
+    "license_number": "457634231",
+    "salary": "50000.00"
+  }
+},
+{
+  "model": "vehicle.driver",
+  "pk": 8,
+  "fields": {
+    "enterprise": 3,
+    "first_name": "Еким",
+    "last_name": "Денисов",
+    "license_number": "576444343",
+    "salary": "50000.00"
+  }
+},
+{
+  "model": "vehicle.driver",
+  "pk": 9,
+  "fields": {
+    "enterprise": 3,
+    "first_name": "Тимур",
+    "last_name": "Ирман",
+    "license_number": "45345324",
+    "salary": "50000.00"
+  }
+},
+{
+  "model": "vehicle.brand",
+  "pk": 1,
+  "fields": {
+    "name": "BMW",
+    "vehicle_type": "car",
+    "fuel_tank_capacity": 78,
+    "cargo_capacity": 1000,
+    "seating_capacity": 5
+  }
+},
+{
+  "model": "vehicle.vehicle",
+  "pk": 3,
+  "fields": {
+    "car_number": "Н234ПП",
+    "price": "2000000.00",
+    "year": 2024,
+    "mileage": 40,
+    "fuel_type": "gasoline",
+    "transmission": "automatic",
+    "color": "Серый",
+    "created_at": "2025-10-19T21:12:32.965Z",
+    "brand": 1,
+    "enterprise": 3
+  }
+},
+{
+  "model": "vehicle.vehicle",
+  "pk": 14,
+  "fields": {
+    "car_number": "ЕЕ453РН54",
+    "price": "2000000.00",
+    "year": 2020,
+    "mileage": 1,
+    "fuel_type": "gasoline",
+    "transmission": "manual",
+    "color": "er",
+    "created_at": "2025-10-20T12:36:26.576Z",
+    "brand": 1,
+    "enterprise": 1
+  }
+},
+{
+  "model": "vehicle.vehicle",
+  "pk": 15,
+  "fields": {
+    "car_number": "Е456АП",
+    "price": "2000000.00",
+    "year": 2025,
+    "mileage": 0,
+    "fuel_type": "electric",
+    "transmission": "robot",
+    "color": "White",
+    "created_at": "2025-10-28T07:41:06.813Z",
+    "brand": 1,
+    "enterprise": 1
+  }
+},
+{
+  "model": "vehicle.drivervehicle",
+  "pk": 4,
+  "fields": {
+    "driver": 7,
+    "vehicle": 3,
+    "is_active": false
+  }
+},
+{
+  "model": "vehicle.drivervehicle",
+  "pk": 9,
+  "fields": {
+    "driver": 1,
+    "vehicle": 14,
+    "is_active": false
+  }
+},
+{
+  "model": "authentication.customuser",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$1t5ZgxGVK8Gpt0fEL4R71w$J5aNkpbHkAM7QXTILSrAx0PsbZcOWBoYkDY+cHJHWo0=",
+    "last_login": "2025-10-28T08:26:57.978Z",
+    "is_superuser": true,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2025-10-16T07:56:55.980Z",
+    "created_at": "2025-10-16T07:56:55.980Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "authentication.customuser",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$0aMqY4koiv8RyDOZgws8jU$ilFRmecEgXZWcUoyaWWZbgsiqyqcTipQmA+aIU2oqdQ=",
+    "last_login": "2025-10-23T09:20:45.215Z",
+    "is_superuser": false,
+    "username": "manager1",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2025-10-16T07:59:27Z",
+    "created_at": "2025-10-16T07:59:27.501Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "authentication.customuser",
+  "pk": 4,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$AInOsPxb023DJgoAkPFNM9$wYuAJ9byMg6kvkxZOekhK/L3rzw9q85wWBngH7CnKHI=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "manager2",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2025-10-19T21:20:43.625Z",
+    "created_at": "2025-10-19T21:20:44.456Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "authentication.customuser",
+  "pk": 5,
+  "fields": {
+    "password": "pbkdf2_sha256$1000000$34c4QHHrSHY6BPtZme35fz$NSFREE4SWMFL0GEDmENvGFUYwwNKE//4XdS3bH1IC7I=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "test",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2025-10-20T08:01:52.467Z",
+    "created_at": "2025-10-20T08:01:53.330Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "authentication.manager",
+  "pk": 1,
+  "fields": {
+    "user": 2,
+    "enterprises": [
+      1,
+      2,
+      15
+    ]
+  }
+},
+{
+  "model": "authentication.manager",
+  "pk": 2,
+  "fields": {
+    "user": 4,
+    "enterprises": [
+      2,
+      3,
+      6,
+      15
+    ]
+  }
+}
+]
