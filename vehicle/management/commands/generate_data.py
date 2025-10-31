@@ -70,8 +70,8 @@ class Command(BaseCommand):
             total_active += active
 
             self.stdout.write(
-                f"→ {enterprise.name}: {len(vehicles)} м, {len(drivers)} в | "
-                f"{active} акт"
+                f"→ {enterprise.name}: {len(vehicles)} машин, {len(drivers)} водителей | "
+                f"{active} активных."
             )
 
         self.stdout.write(self.style.SUCCESS(
