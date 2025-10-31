@@ -154,17 +154,14 @@ class Command(BaseCommand):
     def assign_drivers(self, vehicles, drivers):
         active = 0
 
-        # 1. Активный водитель - каждая ~10-я машина
         for i in range(0, len(vehicles), 10):
             if i >= len(vehicles):
                 break
 
-            # 2. Уже есть активный водитель
             vehicle = vehicles[i]
             if DriverVehicle.objects.filter(vehicle=vehicle, is_active=True).exists():
                 continue
 
-            # 3. Наличие свободных водителей
             free_drivers = [d for d in drivers if not DriverVehicle.objects.filter(driver=d, is_active=True).exists()]
             if not free_drivers:
                 continue
