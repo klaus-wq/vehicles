@@ -27,7 +27,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             '--clear', action='store_true',
-            help='Очистить машины, водителей и назначения перед генерацией.'
+            help='Очистить данные.'
         )
 
     def handle(self, *args, **options):
