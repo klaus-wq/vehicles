@@ -1,32 +1,38 @@
 {% extends 'base.html' %}
+{% load django_bootstrap5 %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}Мои предприятия{% endblock %}
 
 {% block content %}
-  <h1>{{ title }}</h1>
-  
-  {% if enterprises %}
-    <table>
-      <thead>
-        <tr>
-          <th>Название</th>
-          <th>Город</th>
-          <th>Адрес</th>
-          <th>Телефон</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for enterprise in enterprises %}
-          <tr>
-            <td>{{ enterprise.name }}</td>
-            <td>{{ enterprise.city }}</td>
-            <td>{{ enterprise.address }}</td>
-            <td>{{ enterprise.phone }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>Нет доступных предприятий</p>
-  {% endif %}
+<div class="container">
+    <div class="enterprise-list">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Добро пожаловать, {{ user.get_full_name|default:user.username }}!</h2>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger">Выйти</button>
+            </form>
+        </div>
+
+        {% if enterprises %}
+            <div class="list-group">
+                {% for ent in enterprises %}
+                    <a href="{% url 'vehicle_list' ent.id %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">{{ ent.name }}</h5>
+                            <small class="text-muted">ID: {{ ent.id }}</small>
+                        </div>
+                        <p class="mb-1 text-muted">
+                            Машин: {{ ent.vehicle_count }} | Водителей: {{ ent.driver_count }}
+                        </p>
+                    </a>
+                {% empty %}
+                    <div class="alert alert-info">У вас нет доступных предприятий.</div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-warning">Нет предприятий для отображения.</div>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

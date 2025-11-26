@@ -15,11 +15,18 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.contrib.auth.views import LogoutView
 from django.urls import path, include
 from rest_framework import routers
 
+from authentication.views import CustomLoginView
+from vehicle.exceptions import custom_handler403, custom_handler401, custom_handler500
 from vehicle.views import VehicleViewSet, DriverViewSet, EnterpriseViewSet, DriverVehicleViewSet, \
-    EnterprisesListViewSet, EnterpriseCreateFormView, EnterpriseCreateApiView, TestView
+    EnterprisesListViewSet, VehicleListView, VehicleUpdateView, VehicleDeleteView, VehicleFormView
+
+handler403 = custom_handler403
+handler401 = custom_handler401
+# handler500 = custom_handler500
 
 router = routers.DefaultRouter()
 router.register(r'vehicles', VehicleViewSet)
@@ -28,12 +35,24 @@ router.register(r'enterprises', EnterpriseViewSet)
 router.register(r'active', DriverVehicleViewSet)
 
 urlpatterns = [
-    # path('enterprises/', EnterprisesListViewSet.as_view(), name='enterprises_list'),
-    # path('enterprises/create/', EnterpriseCreateApiView.as_view(), name='enterprise_create'),
-    # path('enterprises/create/form/', EnterpriseCreateFormView.as_view(), name='enterprise_create_form'),
+    path('', CustomLoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
+    path('enterprises/', EnterprisesListViewSet.as_view(), name='enterprises_list'),
+    path('enterprise/<int:enterprise_id>/vehicles/', VehicleListView.as_view(), name='vehicle_list'),
+    path('enterprise/<int:enterprise_id>/vehicle/add/', VehicleFormView.as_view(), name='vehicle_create'),
+    path('enterprise/<int:enterprise_id>/vehicle/<int:pk>/edit/', VehicleUpdateView.as_view(), name='vehicle_update'),
+    path('enterprise/<int:enterprise_id>/vehicle/<int:pk>/delete/', VehicleDeleteView.as_view(), name='vehicle_delete'),
+
     path('admin/', admin.site.urls),
-    path('api/auth/', include('authentication.urls')),
+
     path('api/', include(router.urls)),
-    path('api-auth/', include('rest_framework.urls')),
-    path('test/', TestView.as_view()),
+    path('api/auth/', include('authentication.urls')),
 ]
+
+# urlpatterns = [
+#     path('admin/', admin.site.urls),
+#     path('api/auth/', include('authentication.urls')),
+#     path('api/', include(router.urls)),
+#     path('api-auth/', include('rest_framework.urls')),
+#     path('', include('authentication.urls'))
+# ]

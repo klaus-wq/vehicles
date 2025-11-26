@@ -40,12 +40,13 @@ INSTALLED_APPS = [
     'vehicle',
     'authentication',
     'rest_framework',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
+    'django_bootstrap5'
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
         # "rest_framework_simplejwt.authentication.JWTAuthentication",
         'authentication.backends.JWTAuthentication',
     ],
@@ -147,6 +148,12 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = '/enterprises/'
+
+LOGOUT_REDIRECT_URL = '/'
+
+LOGIN_URL = "/"
 
 import sys
 

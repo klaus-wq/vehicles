@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}{{ enterprise.name }} — Машины{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+
+            <!-- Заголовок + кнопки -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>Машины — {{ enterprise.name }}</h2>
+                    <a href="{% url 'enterprises_list' %}" class="btn btn-outline-secondary btn-sm">
+                        ← Назад к предприятиям
+                    </a>
+                </div>
+                <a href="{% url 'vehicle_create' enterprise.id %}" class="btn btn-success">
+                    + Добавить машину
+                </a>
+            </div>
+
+            <!-- Сообщения -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Список машин -->
+            {% if vehicles %}
+                <div class="list-group mb-4">
+                    {% for vehicle in vehicles %}
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">{{ vehicle.car_number }}</h5>
+                                    <p class="mb-1 text-muted">
+                                        {{ vehicle.brand.name }} • {{ vehicle.year }} год • {{ vehicle.color }}
+                                    </p>
+                                    <small class="text-muted">
+                                        Пробег: {{ vehicle.mileage|floatformat:0 }} км
+                                        {% if vehicle.price %} • Стоимость: {{ vehicle.price }} ₽{% endif %}
+                                    </small>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'vehicle_update' enterprise.id vehicle.id %}"
+                                       class="btn btn-outline-primary btn-sm">
+                                        Изменить
+                                    </a>
+
+                                    <button type="button"
+                                            class="btn btn-outline-danger btn-sm"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteModal{{ vehicle.id }}">
+                                        Удалить
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Модальное окно удаления -->
+                        <div class="modal fade" id="deleteModal{{ vehicle.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content border-danger">
+                                    <div class="modal-header bg-danger text-white">
+                                        <h5 class="modal-title">Подтверждение удаления</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body text-center py-4">
+                                        <p class="lead">Удалить машину?</p>
+                                        <h5 class="text-danger fw-bold">{{ vehicle.car_number }}</h5>
+                                        <p class="text-muted">
+                                            {{ vehicle.brand.name }} • {{ vehicle.year }} год
+                                        </p>
+                                    </div>
+                                    <div class="modal-footer justify-content-center">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                            Отмена
+                                        </button>
+                                        <form method="post"
+                                              action="{% url 'vehicle_delete' enterprise.id vehicle.id %}"
+                                              class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger px-4">
+                                                Да, удалить
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- ПАГИНАЦИЯ — красивая и рабочая -->
+                {% if is_paginated %}
+                    <nav aria-label="Навигация по страницам" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item"><a class="page-link" href="?page=1">« </a></li>
+                                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">‹ </a></li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">« </span></li>
+                                <li class="page-item disabled"><span class="page-link">‹ </span></li>
+                            {% endif %}
+
+                            <li class="page-item disabled">
+                                <span class="page-link">Страница {{ page_obj.number }} из {{ paginator.num_pages }}</span>
+                            </li>
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}"> ›</a></li>
+                                <li class="page-item"><a class="page-link" href="?page={{ paginator.num_pages }}"> »</a></li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link"> ›</span></li>
+                                <li class="page-item disabled"><span class="page-link"> »</span></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+
+            {% else %}
+                <!-- Нет машин -->
+                <div class="text-center py-5">
+                    <div class="alert alert-info d-inline-block px-5">
+                        <h5>Пока нет ни одной машины</h5>
+                        <p class="mb-0">Добавьте первую машину на этом предприятии</p>
+                        <a href="{% url 'vehicle_create' enterprise.id %}" class="btn btn-success mt-3">
+                            + Добавить машину
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

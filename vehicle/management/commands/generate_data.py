@@ -115,6 +115,12 @@ class Command(BaseCommand):
         self.stdout.write("Бренды созданы.")
 
     def create_vehicle(self, enterprises, brands):
+        COLORS_MIXED = [
+            'Серый', 'Синий', 'Чёрный', 'Black', 'Blue', 'DarkBlue', 'Gray', 'Green',
+            'Red', 'Orange', 'Silver', 'White', 'Yellow',
+            'Белый', 'Жёлтый', 'Зелёный', 'Красный', 'Оранжевый',
+        ]
+        color = random.choice(COLORS_MIXED)
         brand = random.choice(brands)
         enterprise = random.choice(enterprises)
         plate = fake.bothify(text='???###', letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ')
@@ -130,7 +136,7 @@ class Command(BaseCommand):
             mileage=fake.random_int(min=5000, max=600000),
             fuel_type=random.choice([c[0] for c in Vehicle.FUEL_TYPE_CHOICES]),
             transmission=random.choice([c[0] for c in Vehicle.TRANSMISSION_CHOICES]),
-            color=fake.color_name(),
+            color=color,
             brand=brand,
             enterprise=enterprise
         )

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}Удалить машину?{% endblock %}
+
+{% block content %}
+<div class="container py-5 min-vh-100 d-flex align-items-center">
+    <div class="row justify-content-center w-100">
+        <div class="col-lg-6">
+
+            <div class="card border-danger shadow-lg">
+                <div class="card-header bg-danger text-white text-center py-4">
+                    <h3 class="mb-0">
+                        Подтверждение удаления
+                    </h3>
+                </div>
+
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 4rem;"></i>
+                    </div>
+
+                    <h4 class="text-danger mb-3">Вы уверены, что хотите удалить машину?</h4>
+
+                    <div class="bg-light p-4 rounded mb-4">
+                        <h5 class="text-primary">{{ object.car_number }}</h5>
+                        <p class="mb-1">
+                            <strong>{{ object.brand.name }}</strong><br>
+                            {{ object.year }} год • {{ object.mileage|floatformat:0 }} км
+                        </p>
+                        <p class="text-muted small">
+                            Предприятие: <strong>{{ object.enterprise.name }}</strong>
+                        </p>
+                    </div>
+
+                    <p class="text-muted">
+                        Это действие <strong>нельзя отменить</strong>.
+                    </p>
+                </div>
+
+                <div class="card-footer bg-transparent d-flex justify-content-center gap-3 py-4">
+                    <a href="{% url 'vehicle_list' object.enterprise.id %}"
+                       class="btn btn-secondary btn-lg px-5">
+                        Отмена
+                    </a>
+
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-lg px-5">
+                            Да, удалить
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

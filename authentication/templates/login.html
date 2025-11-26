@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card mx-auto shadow" style="max-width: 420px;">
+        <div class="card-body p-5">
+            <h3 class="text-center mb-4">Вход</h3>
+
+<!--            {% if messages %}-->
+<!--                {% for message in messages %}-->
+<!--                    <div class="alert alert-{{ message.tags|default:'danger' }} alert-dismissible fade show mb-4">-->
+<!--                        {{ message }}-->
+<!--                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>-->
+<!--                    </div>-->
+<!--                {% endfor %}-->
+<!--            {% endif %}-->
+
+            <form method="post">
+                {% csrf_token %}
+                {% bootstrap_form form %}
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        Войти
+                    </button>
+                </div>
+            </form>
+
+<!--            {% if form.non_field_errors %}-->
+<!--                <div class="alert alert-danger mt-3">-->
+<!--                    {{ form.non_field_errors }}-->
+<!--                </div>-->
+<!--            {% endif %}-->
+        </div>
+    </div>
+</div>
+{% endblock %}
