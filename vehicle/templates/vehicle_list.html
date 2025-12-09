@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load django_bootstrap5 %}
+{% load static %}
 
 {% block title %}{{ enterprise.name }} — Машины{% endblock %}
 
@@ -8,8 +9,7 @@
     <div class="row">
         <div class="col-lg-10 mx-auto">
 
-            <!-- Заголовок + кнопки -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center mb-4">
                 <div>
                     <h2>Машины — {{ enterprise.name }}</h2>
                     <a href="{% url 'enterprises_list' %}" class="btn btn-outline-secondary btn-sm">
@@ -21,7 +21,6 @@
                 </a>
             </div>
 
-            <!-- Сообщения -->
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
@@ -31,16 +30,18 @@
                 {% endfor %}
             {% endif %}
 
-            <!-- Список машин -->
-            {% if vehicles %}
+            {% if vehicles_json %}
                 <div class="list-group mb-4">
-                    {% for vehicle in vehicles %}
+                    {% for vehicle in vehicles_json %}
                         <div class="list-group-item list-group-item-action">
                             <div class="d-flex w-100 justify-content-between align-items-center">
                                 <div>
                                     <h5 class="mb-1">{{ vehicle.car_number }}</h5>
                                     <p class="mb-1 text-muted">
-                                        {{ vehicle.brand.name }} • {{ vehicle.year }} год • {{ vehicle.color }}
+                                        {{ vehicle.brand.name }} • {{ vehicle.year }} год • {{ vehicle.color }} •
+                                        <span class="datetime-local" data-iso="{{ vehicle.purchase_datetime }}">
+                                            загружается...
+                                        </span>
                                     </p>
                                     <small class="text-muted">
                                         Пробег: {{ vehicle.mileage|floatformat:0 }} км
@@ -64,7 +65,6 @@
                             </div>
                         </div>
 
-                        <!-- Модальное окно удаления -->
                         <div class="modal fade" id="deleteModal{{ vehicle.id }}" tabindex="-1">
                             <div class="modal-dialog modal-dialog-centered">
                                 <div class="modal-content border-danger">
@@ -98,7 +98,6 @@
                     {% endfor %}
                 </div>
 
-                <!-- ПАГИНАЦИЯ — красивая и рабочая -->
                 {% if is_paginated %}
                     <nav aria-label="Навигация по страницам" class="mt-4">
                         <ul class="pagination justify-content-center">
@@ -126,7 +125,6 @@
                 {% endif %}
 
             {% else %}
-                <!-- Нет машин -->
                 <div class="text-center py-5">
                     <div class="alert alert-info d-inline-block px-5">
                         <h5>Пока нет ни одной машины</h5>
@@ -141,4 +139,5 @@
         </div>
     </div>
 </div>
+<script src="{% static 'js/formatDatetime.js' %}"></script>
 {% endblock %}

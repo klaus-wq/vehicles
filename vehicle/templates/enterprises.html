@@ -23,8 +23,12 @@
                             <small class="text-muted">ID: {{ ent.id }}</small>
                         </div>
                         <p class="mb-1 text-muted">
-                            Машин: {{ ent.vehicle_count }} | Водителей: {{ ent.driver_count }}
+                            Машин: {{ ent.vehicle_count }} | Водителей: {{ ent.driver_count }} | {{ ent.timezone }}
                         </p>
+                         <a href="{% url 'enterprise_update' ent.id %}"
+                               class="btn btn-outline-primary btn-sm w-100">
+                                Редактировать предприятие
+                            </a>
                     </a>
                 {% empty %}
                     <div class="alert alert-info">У вас нет доступных предприятий.</div>

@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}Бренды автомобилей{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Бренды автомобилей</h1>
+        <a href="{% url 'brand_create' %}" class="btn btn-success btn-lg">
+            <i class="bi bi-plus-circle"></i> Добавить бренд
+        </a>
+    </div>
+
+    {% if object_list %}
+        <div class="row g-4">
+            {% for brand in object_list %}
+                <div class="col-md-6 col-lg-4 col-xl-3">
+                    <div class="card h-100 shadow-sm hover-shadow">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title mb-3">{{ brand.name }}</h5>
+
+                            {% if brand.description %}
+                                <p class="card-text text-muted small flex-grow-1">
+                                    {{ brand.description|truncatewords:20 }}
+                                </p>
+                            {% endif %}
+
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    Машин с этим брендом: 
+                                    <strong>{{ brand.vehicles.count }}</strong>
+                                </small>
+                            </div>
+
+                            <div class="mt-4 d-flex gap-2">
+                                <a href="{% url 'brand_update' brand.id %}"
+                                   class="btn btn-outline-primary btn-sm flex-fill">
+                                    Изменить
+                                </a>
+                                <a href="{% url 'brand_delete' brand.id %}"
+                                   class="btn btn-outline-danger btn-sm flex-fill
+                                          {% if brand.vehicles.exists %}disabled opacity-50{% endif %}">
+                                    Удалить
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <p class="text-muted fs-4">Бренды ещё не добавлены</p>
+            <a href="{% url 'brand_create' %}" class="btn btn-success btn-lg mt-3">
+                Добавить первый бренд
+            </a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

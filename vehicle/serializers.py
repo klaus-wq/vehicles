@@ -1,3 +1,4 @@
+import pytz
 from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
 
@@ -29,6 +30,7 @@ class DriverSerializer(serializers.ModelSerializer):
 
 class VehicleSerializer(serializers.ModelSerializer):
     active_driver = serializers.SerializerMethodField()
+    purchase_datetime = serializers.SerializerMethodField()
 
     class Meta:
         model = Vehicle
@@ -42,6 +44,7 @@ class VehicleSerializer(serializers.ModelSerializer):
             'transmission',
             'color',
             'created_at',
+            'purchase_datetime',
             'brand',
             'enterprise',
             'drivers',
@@ -56,6 +59,12 @@ class VehicleSerializer(serializers.ModelSerializer):
             return -1
         except:
             return -1
+
+    def get_purchase_datetime(self, obj):
+        if not obj.purchase_datetime:
+            return None
+        tz = pytz.timezone(obj.enterprise.timezone or 'UTC')
+        return obj.purchase_datetime.astimezone(tz).isoformat()
 
 class DriverVehicleSerializer(serializers.ModelSerializer):
     class Meta:

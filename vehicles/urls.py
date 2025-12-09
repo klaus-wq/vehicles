@@ -22,7 +22,8 @@ from rest_framework import routers
 from authentication.views import CustomLoginView
 from vehicle.exceptions import custom_handler403, custom_handler401, custom_handler500
 from vehicle.views import VehicleViewSet, DriverViewSet, EnterpriseViewSet, DriverVehicleViewSet, \
-    EnterprisesListViewSet, VehicleListView, VehicleUpdateView, VehicleDeleteView, VehicleFormView
+    EnterprisesListViewSet, VehicleListView, VehicleUpdateView, VehicleDeleteView, VehicleFormView, BrandDeleteView, \
+    BrandListView, BrandUpdateView, BrandCreateView, EnterpriseUpdateView
 
 handler403 = custom_handler403
 handler401 = custom_handler401
@@ -42,6 +43,12 @@ urlpatterns = [
     path('enterprise/<int:enterprise_id>/vehicle/add/', VehicleFormView.as_view(), name='vehicle_create'),
     path('enterprise/<int:enterprise_id>/vehicle/<int:pk>/edit/', VehicleUpdateView.as_view(), name='vehicle_update'),
     path('enterprise/<int:enterprise_id>/vehicle/<int:pk>/delete/', VehicleDeleteView.as_view(), name='vehicle_delete'),
+    path('enterprise/<int:pk>/edit/', EnterpriseUpdateView.as_view(), name='enterprise_update'),
+
+    path('brand/<int:pk>/delete/', BrandDeleteView.as_view(), name='brand_delete'),
+    path('brands/', BrandListView.as_view(), name='brands_list'),
+    path('brand/add/', BrandCreateView.as_view(), name='brand_create'),
+    path('brand/<int:pk>/edit/', BrandUpdateView.as_view(), name='brand_update'),
 
     path('admin/', admin.site.urls),
 

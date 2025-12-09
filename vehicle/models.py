@@ -1,6 +1,11 @@
+from zoneinfo import available_timezones
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
+
+from vehicles import settings
 
 class Enterprise(models.Model):
     id = models.AutoField(
@@ -25,6 +30,11 @@ class Enterprise(models.Model):
         max_length=20,
         blank=True,
         verbose_name='Телефон'
+    )
+    timezone = models.CharField(
+        max_length=50,
+        choices=sorted([(tz, tz) for tz in available_timezones()]),
+        default=settings.TIME_ZONE,
     )
 
     class Meta:
@@ -199,6 +209,12 @@ class Vehicle(models.Model):
         through='DriverVehicle',
         related_name='vehicle_drivers',
         verbose_name='водители'
+    )
+    purchase_datetime = models.DateTimeField(
+        default=timezone.now,
+        verbose_name="Время покупки",
+        null=True,
+        blank=True
     )
 
     class Meta:

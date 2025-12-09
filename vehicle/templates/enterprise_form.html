@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}Настройки предприятия{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-8">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    {% if object.name %}
+                        <h3 class="mb-4 text-nowrap">Редактировать</h3>
+                    {% else %}
+                        <h3 class="mb-4 text-nowrap">Создать</h3>
+                    {% endif %}
+                    {% if object.name %}
+                        <p class="text-muted">Предприятие: <strong>{{ object.name }}</strong></p>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% bootstrap_field form.name %}
+                        {% bootstrap_field form.city %}
+                        {% bootstrap_field form.address %}
+
+                        <div class="mb-4">
+                           <label for="id_timezone" class="form-label fw-bold">
+                                Local Time Zone
+                            </label>
+                            <select name="timezone" class="form-select form-select-lg" id="id_timezone">
+                                <option value="">UTC (default)</option>
+                                {% for tz in timezone_choices %}
+                                    <option value="{{ tz.value }}"
+                                            {% if object.timezone == tz.value %}selected{% endif %}>
+                                        {{ tz.label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+<!--                            <div class="form-text">-->
+<!--                                Сейчас на предприятии:-->
+<!--                                <strong id="current-time-preview">-->
+<!--                                    {{ now_in_enterprise_tz|date:"d.m.Y H:i" }}-->
+<!--                                    ({{ enterprise.timezone|default:"UTC" }})-->
+<!--                                </strong>-->
+<!--                            </div>-->
+                        </div>
+
+                           <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'enterprises_list' %}"
+                               class="btn btn-secondary me-md-2">
+                                Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary px-5">
+                                Сохранить
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

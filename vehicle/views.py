@@ -1,30 +1,27 @@
+import pytz
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator
 from django.db.models import Count, ProtectedError
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from django.utils.decorators import method_decorator
+from django.utils import timezone
 from django.utils.html import format_html
-from django.views.decorators.csrf import csrf_protect
-from django.views.generic import ListView, TemplateView, CreateView
+from django.views.generic import ListView, TemplateView, CreateView, DetailView
 from rest_framework import viewsets, status
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.filters import OrderingFilter
 from authentication.models import Manager
-from vehicle.models import Vehicle, Driver, Enterprise, DriverVehicle
+from vehicle.models import Vehicle, Driver, Enterprise, DriverVehicle, Brand
 from vehicle.permissions import IsManagerOrReadOnly
 from vehicle.serializers import VehicleSerializer, DriverSerializer, EnterpriseSerializer, DriverVehicleSerializer
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy, reverse
-from django.contrib import messages
 from django.shortcuts import get_object_or_404
-from django.shortcuts import render
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 
@@ -225,6 +222,48 @@ class EnterpriseCreateView(APIView):
 class EnterpriseCreateFormView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'enterprise_create.html'
 
+class EnterpriseUpdateView(LoginRequiredMixin, UpdateView):
+    model = Enterprise
+    fields = ['name', 'city', 'address', 'phone', 'timezone']
+    template_name = 'enterprise_form.html'
+    success_url = None
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return Enterprise.objects.all()
+        return self.request.user.manager.enterprises.all()
+
+    def get_success_url(self):
+        return reverse('enterprises_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['enterprise'] = self.object
+        tz_name = self.object.timezone or 'UTC'
+        context['now_in_enterprise_tz'] = timezone.now().astimezone(pytz.timezone(tz_name))
+        print(f"DEBUG: tz_name = {tz_name}, now_tz = {context['now_in_enterprise_tz']}")
+        common = pytz.common_timezones
+        now = timezone.now()
+        timezone_choices = []
+        for tz in common:
+            try:
+                offset = now.astimezone(pytz.timezone(tz)).utcoffset()
+                hours = int(offset.total_seconds() // 3600)
+                sign = "+" if hours >= 0 else ""
+                offset_str = f"UTC{sign}{hours:02d}:00"
+                timezone_choices.append({
+                    'value': tz,
+                    'label': f"{tz} ({offset_str})"
+                })
+            except Exception:
+                timezone_choices.append({'value': tz, 'label': tz})
+
+        timezone_choices.sort(key=lambda x: x['value'])
+
+        context['timezone_choices'] = timezone_choices
+        return context
+
 class VehicleListView(LoginRequiredMixin, ListView):
     template_name = 'vehicle_list.html'
     context_object_name = 'vehicles'
@@ -238,45 +277,132 @@ class VehicleListView(LoginRequiredMixin, ListView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        return Vehicle.objects.filter(enterprise=self.enterprise)
+        return Vehicle.objects.none()
+    #     return Vehicle.objects.filter(enterprise=self.enterprise)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['enterprise'] = self.enterprise
+
+        queryset = Vehicle.objects.filter(enterprise=self.enterprise)
+        paginator = Paginator(queryset, self.paginate_by)
+        page_obj = paginator.get_page(self.request.GET.get('page'))
+
+        serializer = VehicleSerializer(page_obj.object_list, many=True)
+        context['vehicles_json'] = serializer.data
+        print(context['vehicles_json'][0])
+        context['page_obj'] = page_obj
+        context['is_paginated'] = page_obj.has_other_pages()
+
         return context
 
-# class VehicleForm(forms.ModelForm):
-#     class Meta:
-#         model = Vehicle
-#         fields = '__all__'
 
 class VehicleFormView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = Vehicle
-    fields = ['car_number', 'brand', 'year', 'mileage', 'color', 'price', 'fuel_type', 'transmission']
+    fields = ['car_number', 'purchase_datetime', 'brand', 'year', 'mileage', 'color', 'price', 'fuel_type', 'transmission', 'enterprise']
     template_name = 'vehicle_form.html'
     success_message = "Машина успешно сохранена!"
 
     def dispatch(self, request, *args, **kwargs):
-        self.enterprise = get_object_or_404(Enterprise, id=self.kwargs['enterprise_id'])
-        # Проверка прав
+        self.enterprise_from_url = get_object_or_404(Enterprise, id=self.kwargs['enterprise_id'])
+
         if not request.user.is_superuser:
-            if self.enterprise not in request.user.manager.enterprises.all():
+            if self.enterprise_from_url not in request.user.manager.enterprises.all():
                 raise PermissionDenied("Доступ запрещён")
         return super().dispatch(request, *args, **kwargs)
 
+    def get_queryset(self):
+        return Vehicle.objects.filter(enterprise=self.enterprise_from_url)
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        tz = pytz.timezone(self.enterprise_from_url.timezone or 'UTC')
+
+        form.fields['fuel_type'].empty_label = None
+        form.fields['transmission'].empty_label = None
+
+        if self.object:
+            if 'enterprise' in form.fields:
+                del form.fields['enterprise']
+
+        else:
+            if not self.request.user.is_superuser:
+                queryset = self.request.user.manager.enterprises.all()
+            else:
+                queryset = Enterprise.objects.all()
+
+            form.fields['enterprise'].queryset = queryset
+            form.fields['enterprise'].empty_label = None
+            form.fields['enterprise'].required = True
+
+            form.fields['fuel_type'].initial = 'petrol'
+            form.fields['transmission'].initial = 'automatic'
+
+        if self.object and self.object.purchase_datetime:
+            localized = self.object.purchase_datetime.astimezone(tz)
+            form.initial['purchase_datetime'] = localized.strftime('%Y-%m-%dT%H:%M')
+        else:
+            # при создании — текущее время в зоне предприятия
+            now_local = timezone.now().astimezone(tz)
+            form.initial['purchase_datetime'] = now_local.strftime('%Y-%m-%dT%H:%M')
+
+        return form
+
+    def form_valid(self, form):
+        purchase_dt = form.cleaned_data.get('purchase_datetime')
+        if purchase_dt:
+            tz = pytz.timezone(self.enterprise_from_url.timezone or 'UTC')
+            aware_local = tz.localize(purchase_dt)  # делаем aware в зоне предприятия
+            form.instance.purchase_datetime = aware_local.astimezone(pytz.UTC)
+
+        form.instance.enterprise = self.enterprise_from_url
+        messages.success(self.request, f"Машина {form.instance.car_number} успешно сохранена!")
+        return super().form_valid(form)
+
+    # def get_form(self, form_class=None):
+    #     form = super().get_form(form_class)
+    #
+    #     form.fields['fuel_type'].empty_label = None
+    #     form.fields['transmission'].empty_label = None
+    #
+    #     if self.object:
+    #         if 'enterprise' in form.fields:
+    #             del form.fields['enterprise']
+    #
+    #     else:
+    #         if not self.request.user.is_superuser:
+    #             queryset = self.request.user.manager.enterprises.all()
+    #         else:
+    #             queryset = Enterprise.objects.all()
+    #
+    #         form.fields['enterprise'].queryset = queryset
+    #         form.fields['enterprise'].empty_label = None
+    #         form.fields['enterprise'].required = True
+    #
+    #         form.fields['fuel_type'].initial = 'petrol'
+    #         form.fields['transmission'].initial = 'automatic'
+    #
+    #     return form
+
+    def get_initial(self):
+        initial = super().get_initial()
+        if not self.object:
+            initial['enterprise'] = self.enterprise_from_url
+        return initial
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['enterprise'] = self.enterprise
+        context['enterprise'] = self.enterprise_from_url
         context['title'] = 'Редактировать машину' if self.object else 'Добавить машину'
         return context
 
-    def form_valid(self, form):
-        form.instance.enterprise = self.enterprise
-        messages.success(self.request, f"Машина {form.instance.car_number} сохранена!")
-        return super().form_valid(form)
+    # def form_valid(self, form):
+    #     form.instance.enterprise = self.enterprise_from_url
+    #     messages.success(self.request, f"Машина {form.instance.car_number} успешно сохранена!")
+    #     return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy('vehicle_list', kwargs={'enterprise_id': self.enterprise.id})
+        return reverse_lazy('vehicle_list', kwargs={'enterprise_id': self.enterprise_from_url.id})
 
 class VehicleUpdateView(VehicleFormView, UpdateView):
     success_message = "Машина успешно обновлена!"
@@ -323,3 +449,46 @@ class VehicleDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return reverse_lazy('vehicle_list', kwargs={'enterprise_id': self.kwargs['enterprise_id']})
+
+class BrandListView(LoginRequiredMixin, ListView):
+    model = Brand
+    template_name = 'brand_list.html'
+    context_object_name = 'object_list'
+
+class BrandCreateView(LoginRequiredMixin, CreateView):
+    model = Brand
+    fields = '__all__'
+    template_name = 'brand_form.html'
+    success_url = reverse_lazy('brands_list')
+
+class BrandUpdateView(BrandCreateView, UpdateView):
+    pass
+
+class BrandDeleteView(LoginRequiredMixin, DeleteView):
+    model = Brand
+    template_name = 'brand_confirm_delete.html'
+    success_url = reverse_lazy('brands_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        brand = self.get_object()
+
+        vehicles = brand.vehicle_set.all().order_by('car_number')
+
+        paginator = Paginator(vehicles, 10)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        context['protected_objects'] = page_obj
+        context['page_obj'] = page_obj
+        context['is_paginated'] = page_obj.has_other_pages()
+
+        return context
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            response = super().delete(request, *args, **kwargs)
+            messages.success(request, f"Бренд «{self.object.name}» успешно удалён.")
+            return response
+        except ProtectedError:
+            return self.get(request, *args, **kwargs)

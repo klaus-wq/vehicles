@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}Удалить бренд{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow">
+                <div class="card-body p-5">
+
+                    <h3 class="text-danger mb-4">Удалить бренд «{{ object.name }}»?</h3>
+
+                    {% if protected_objects %}
+                        <div class="alert alert-danger">
+                            <strong>Нельзя удалить бренд</strong><br>
+                            Он используется в <strong>{{ protected_objects.paginator.count }}</strong>
+                            {% if protected_objects.paginator.count == 1 %}автомобиле{% else %}автомобилях{% endif %}
+                        </div>
+
+                        <!-- Пагинированный список машин -->
+                        <div class="border rounded p-4 bg-light" style="max-height: 500px; overflow-y: auto;">
+                            <ul class="list-unstyled mb-0">
+                                {% for vehicle in protected_objects %}
+                                    <li class="py-2 border-bottom">
+                                        <strong>{{ vehicle.car_number }}</strong> —
+                                        {{ vehicle.year }} г.
+                                        {% if vehicle.color %}• {{ vehicle.color }}{% endif %}
+                                        {% if vehicle.enterprise %}• {{ vehicle.enterprise.name }}{% endif %}
+                                    </li>
+                                {% empty %}
+                                    <li class="text-muted">Нет автомобилей</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                        <!-- Пагинация -->
+                        {% if is_paginated %}
+                            <nav class="mt-4">
+                                <ul class="pagination justify-content-center">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Назад</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled"><span class="page-link">Назад</span></li>
+                                    {% endif %}
+
+                                    <li class="page-item disabled">
+                                        <span class="page-link">
+                                            {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+                                        </span>
+                                    </li>
+
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперёд</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled"><span class="page-link">Вперёд</span></li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <a href="{% url 'brands_list' %}" class="btn btn-secondary px-4">
+                                ← Вернуться к списку
+                            </a>
+                        </div>
+
+                    {% else %}
+                        <!-- Если можно удалить -->
+                        <p class="text-muted">Бренд не используется и может быть удалён.</p>
+                        <form method="post" class="mt-4">
+                            {% csrf_token %}
+                            <div class="d-flex justify-content-end gap-3">
+                                <a href="{% url 'brands_list' %}" class="btn btn-secondary">Отмена</a>
+                                <button type="submit" class="btn btn-danger px-4">Да, удалить</button>
+                            </div>
+                        </form>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

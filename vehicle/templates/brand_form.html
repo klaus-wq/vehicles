@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}{% if object %}Редактировать{% else %}Добавить{% endif %} бренд{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h3 class="mb-4">
+                        {% if object %}Редактировать{% else %}Добавить{% endif %} бренд
+                    </h3>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        {% bootstrap_form form %}
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'brands_list' %}" class="btn btn-secondary me-md-2">
+                                Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary px-5">
+                                {% if object %}Сохранить изменения{% else %}Добавить бренд{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
