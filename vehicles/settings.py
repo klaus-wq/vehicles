@@ -37,8 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.gis',
     'vehicle',
     'authentication',
+    'telemetry',
     'rest_framework',
     'rest_framework.authtoken',
     'django_bootstrap5'
@@ -98,7 +100,7 @@ DATABASES = {
     #     'NAME': BASE_DIR / 'db.sqlite3',
     # }
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'vehicles5',
         'USER': 'vehicleuser2',
         'PASSWORD': 'admin',
