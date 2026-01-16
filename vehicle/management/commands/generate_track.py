@@ -12,6 +12,18 @@ from telemetry.models import TelemetryTrip, TelemetryPoint
 from vehicle.models import Vehicle
 from vehicles.settings import GRAPHOPPER_API_KEY
 
+def equirectangular_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Упрощённая формула Гаверсина для малых расстояний https://www.movable-type.co.uk/scripts/latlong.html."""
+    R = 6371.0
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    delta = math.radians(lon2 - lon1)
+    phim = (phi1 + phi2) / 2
+    x = delta * math.cos(phim)
+    y = phi2 - phi1
+    d = R * math.sqrt(x * x + y * y)
+    return d
+
 def random_point_with_step(
     current: Point,
     center: Point,
@@ -28,8 +40,8 @@ def random_point_with_step(
 
     res_point = Point(new_lon, new_lat)
 
-    distance_to_center = center.distance(res_point)
-    while distance_to_center >= radius / 111.32:
+    distance_to_center = equirectangular_distance(center.y, center.x, res_point.y, res_point.x)
+    while distance_to_center >= radius:
         res_point = random_point_with_step(current, center, radius, step)
     return res_point
 
@@ -38,8 +50,7 @@ def random_point_in_radius(
     center_lon: float,
     radius: float,
 ) -> Point:
-    """https://habr.com/ru/articles/583838/"""
-    """Полярные координаты"""
+    """Полярные координаты https://habr.com/ru/articles/583838/"""
     r = radius * math.sqrt(random.random())
     theta = random.uniform(0, 2 * math.pi)
 
