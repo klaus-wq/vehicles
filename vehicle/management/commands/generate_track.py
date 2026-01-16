@@ -24,12 +24,7 @@ def equirectangular_distance(lat1: float, lon1: float, lat2: float, lon2: float)
     d = R * math.sqrt(x * x + y * y)
     return d
 
-def random_point_with_step(
-    current: Point,
-    center: Point,
-    radius: float,
-    step: float,
-) -> Point:
+def random_point_with_step(current: Point, center: Point, radius: float, step: float) -> Point:
     theta = random.uniform(0, 2 * math.pi)
 
     lat = (step / 111.32) * math.cos(theta)
