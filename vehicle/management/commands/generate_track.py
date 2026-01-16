@@ -113,7 +113,7 @@ class Command(BaseCommand):
 
             for i, (lon, lat) in enumerate(coordinates):
                 location = Point(lon, lat)
-                if previous_point is not None and previous_point.distance(location) < 0.00005:
+                if previous_point is not None and previous_point.distance(location) < 0.00009:
                     continue
                 previous_point = location
 
