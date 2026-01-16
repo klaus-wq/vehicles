@@ -119,12 +119,6 @@ class Command(BaseCommand):
 
                 self.stdout.write(self.style.SUCCESS(f"Добавлена точка: [{lat} {lon}] в {telemetry_point.timestamp}."))
 
-                # if previous_point is not None:
-                #     distance = previous_point.distance(location) * 111.32
-                #     print(distance)
-                #     current_length += distance
-                # self.stdout.write(f"Остаток: {total_length - current_length} km")
-
                 time.sleep(10)
 
             current_point = Point(coordinates[-1][0], coordinates[-1][1])
