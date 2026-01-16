@@ -45,11 +45,7 @@ def random_point_with_step(
         res_point = random_point_with_step(current, center, radius, step)
     return res_point
 
-def random_point_in_radius(
-    center_lat: float,
-    center_lon: float,
-    radius: float,
-) -> Point:
+def random_point_in_radius(center_lat: float, center_lon: float, radius: float) -> Point:
     """Полярные координаты https://habr.com/ru/articles/583838/"""
     r = radius * math.sqrt(random.random())
     theta = random.uniform(0, 2 * math.pi)
