@@ -53,10 +53,6 @@ def random_point_in_radius(
 
 
 class Command(BaseCommand):
-    response = requests.get(
-        f"https://graphhopper.com/api/1/route?point={'df'},{'df'}&point={'fgh'},{'dfg'}&profile=car&locale=de&calc_points=true&points_encoded=false&key={GRAPHOPPER_API_KEY}",
-        timeout=10)
-    data = response.json()
     help = 'Генерирует трек для автомобиля в Красноярске.'
 
     def add_arguments(self, parser):
