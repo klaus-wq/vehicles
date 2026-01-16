@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1']
 
+GRAPHOPPER_API_KEY = '429c44b1-840e-4355-888a-230afe5310b7'
 
 # Application definition
 

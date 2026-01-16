@@ -54,6 +54,8 @@ urlpatterns = [
 
     path('api/', include(router.urls)),
     path('api/auth/', include('authentication.urls')),
+
+    path('api/telemetry/', include('telemetry.urls')),
 ]
 
 # urlpatterns = [
