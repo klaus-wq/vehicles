@@ -2,11 +2,11 @@ import random
 import time
 import math
 import requests
-from datetime import timedelta, datetime
 
 from django.core.management.base import BaseCommand
-from django.utils import timezone
+from datetime import datetime, timedelta, timezone
 from django.contrib.gis.geos import Point
+from faker import Faker
 
 from telemetry.models import TelemetryTrip, TelemetryPoint
 from vehicle.models import Vehicle
@@ -87,6 +87,9 @@ class Command(BaseCommand):
 
         current_length = 0.0
 
+        fake = Faker()
+        point_start_time = fake.date_time_between(start_date="-5y", end_date="now", tzinfo=timezone.utc)
+
         while current_length < total_length:
             random_point = random_point_with_step(current_point, Point(center_lon, center_lat), radius, step)
 
@@ -108,7 +111,11 @@ class Command(BaseCommand):
                     continue
                 previous_point = location
 
-                telemetry_point = TelemetryPoint(vehicle=vehicle, location=location, timestamp=datetime.now())
+                telemetry_point = TelemetryPoint(vehicle=vehicle, location=location)
+                telemetry_point.save()
+
+                point_start_time += timedelta(seconds=10)
+                telemetry_point.timestamp = point_start_time
                 telemetry_point.save()
 
                 if start_point is None:
@@ -127,6 +134,8 @@ class Command(BaseCommand):
             vehicle=vehicle,
             start_point=start_point,
             end_point=end_point,
+            start_time=start_point.timestamp,
+            end_time=end_point.timestamp,
         )
         telemetry_trip.save()
 

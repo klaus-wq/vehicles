@@ -1,9 +1,9 @@
-from telemetry.views import TrackAPIView, VehicleGPSPointViewSet
+from telemetry.views import TrackAPIView, TracksAPIView
 from django.urls import path
 
 app_name = "telemetry"
 
 urlpatterns = [
     path('track/', TrackAPIView.as_view(), name='track'),
-    path('points/', VehicleGPSPointViewSet.as_view({'get': 'list'}), name='points'),
+    path('tracks/', TracksAPIView.as_view(), name="tracks")
 ]
