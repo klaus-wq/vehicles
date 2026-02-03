@@ -2,7 +2,7 @@ import pytz
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
-from .address import get_address
+from telemetry.utils.address import get_address
 from .models import TelemetryPoint, TelemetryTrip
 
 
