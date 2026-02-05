@@ -146,16 +146,15 @@ class OpenRouteService(Geocoder):
         except Exception:
             return "Адрес неизвестен"
 
+GEOCODERS = {
+    "geoapify": Geoapify,
+    "nominatim": Nominatim,
+    "locationiq": LocationIQ,
+    "dadata": DaData,
+    "yandex": Yandex,
+    "openrouteservice": OpenRouteService,
+}
+
 def get_address(lat: float, lon: float) -> str:
-    geocoder = Geoapify()
-    if GEOCODER == "nominatim":
-        geocoder = Nominatim()
-    elif GEOCODER == "locationiq":
-        geocoder = LocationIQ()
-    elif GEOCODER == "dadata":
-        geocoder = DaData()
-    elif GEOCODER == "yandex":
-        geocoder = Yandex()
-    elif GEOCODER == "openrouteservice":
-        geocoder = OpenRouteService()
-    return geocoder.get_address(lat, lon)
+    geocoder = GEOCODERS.get(GEOCODER, Geoapify)
+    return geocoder().get_address(lat, lon)
