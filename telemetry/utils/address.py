@@ -2,9 +2,9 @@ import requests
 from vehicles.settings import GEOAPIFY_API_KEY
 
 
-def get_address(lat, lng):
+def get_address(lat, lon):
     try:
-        url = f"https://api.geoapify.com/v1/geocode/reverse?lat={lat}&lon={lng}&format=json&lang=ru&apiKey={GEOAPIFY_API_KEY}"
+        url = f"https://api.geoapify.com/v1/geocode/reverse?lat={lat}&lon={lon}&format=json&lang=ru&apiKey={GEOAPIFY_API_KEY}"
         response = requests.get(url)
         data = response.json()
         if (response.status_code == 200 and data.get("results") and len(data["results"]) > 0):
