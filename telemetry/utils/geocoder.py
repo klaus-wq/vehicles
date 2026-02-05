@@ -128,7 +128,6 @@ class OpenRouteService(Geocoder):
             "point.lon": lon,
             "point.lat": lat,
             "size": 1,
-            "layers": "venue,address,street",
         }
 
         try:
