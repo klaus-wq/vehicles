@@ -29,7 +29,7 @@ ALLOWED_HOSTS = ['127.0.0.1']
 
 GRAPHOPPER_API_KEY = '429c44b1-840e-4355-888a-230afe5310b7'
 
-GEOAPIFY_API_KEY = 'afcd2c30238e48988ae34ef47dcde558'
+GEOAPIFY_API_KEY = 'd548c5ed24604be6a9dd0d989631f783'
 
 LOCATIONIQ_API_KEY = 'pk.ae070bdac5c4e5acaad87b73a8de6ee0'
 
@@ -39,7 +39,7 @@ YANDEX_API_KEY = '2e2774f4-fb6f-4089-835b-b8103c041ed9'
 
 ORS_API_KEY = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjI1OTlkODhkMzU2ZjRiNWNiMTYzNjBlOWI0NmQ4ZTg2IiwiaCI6Im11cm11cjY0In0='
 
-GEOCODER = "openrouteservice"
+GEOCODER = ""
 
 # Application definition
 
@@ -56,7 +56,8 @@ INSTALLED_APPS = [
     'telemetry',
     'rest_framework',
     'rest_framework.authtoken',
-    'django_bootstrap5'
+    'django_bootstrap5',
+    'import_export',
 ]
 
 REST_FRAMEWORK = {

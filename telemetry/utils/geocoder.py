@@ -1,10 +1,31 @@
 from abc import abstractmethod, ABC
 
 import requests
+from requests import RequestException
 
 from vehicles.settings import GEOAPIFY_API_KEY, GEOCODER, LOCATIONIQ_API_KEY, DADATA_API_KEY, YANDEX_API_KEY, \
     ORS_API_KEY
 
+
+def get_coordinates(address):
+    try:
+        url = f"https://api.geoapify.com/v1/geocode/search?text={address}&limit=1&format=json&apiKey={GEOAPIFY_API_KEY}"
+        response = requests.get(url)
+        data = response.json()
+
+        print(f"Address: {address}")
+        print(f"Response: {data}")
+
+        if "results" in data and data["results"]:
+            first = data["results"][0]
+            lat = first.get("lat")
+            lon = first.get("lon")
+            if lat is not None and lon is not None:
+                return float(lat), float(lon)
+        return None
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
 
 class Geocoder(ABC):
 

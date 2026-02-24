@@ -39,6 +39,7 @@ class TripSerializer(serializers.ModelSerializer):
     class Meta:
         model = TelemetryTrip
         fields = [
+            'id',
             'start_time',
             'end_time',
             'start_address',

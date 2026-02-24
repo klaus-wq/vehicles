@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}Импорт {{ model_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2>Импорт {{ model_name }}</h2>
+  <p>Поддерживаемые форматы: JSON, CSV</p>
+
+  <form method="post" enctype="multipart/form-data" 
+        action="{% url url_name %}" 
+        class="mt-4">
+    {% csrf_token %}
+    
+    <div class="mb-3">
+      <label for="file" class="form-label">Выберите файл</label>
+      <input type="file" name="file" id="file" class="form-control" accept=".json,.csv" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Формат</label>
+      <select name="import_format" class="form-select">
+        <option value="json">JSON</option>
+        <option value="csv">CSV</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-success">Загрузить и импортировать</button>
+  </form>
+
+  {% if messages %}
+    <div class="mt-4">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

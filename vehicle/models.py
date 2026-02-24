@@ -221,9 +221,9 @@ class Vehicle(models.Model):
         verbose_name = 'Автомобиль'
         verbose_name_plural = 'Автомобили'
 
-    def __str__(self):
-        drivers_list = ", ".join([f"{driver.last_name} {driver.first_name}" for driver in self.drivers.all()])
-        return f'{self.id}, {self.car_number}, {self.enterprise.name}, {drivers_list}'
+    # def __str__(self):
+    #     drivers_list = ", ".join([f"{driver.last_name} {driver.first_name}" for driver in self.drivers.all()])
+    #     return f'{self.id}, {self.car_number}, {self.enterprise.name}, {drivers_list}'
         # return f'{self.id}, {self.enterprise}, {self.drivers}, {self.car_number}, {self.brand}, {self.year} г., {self.mileage} км., {self.color}, {self.price}, {self.get_fuel_type_display()}, {self.get_transmission_display()}'
 
     def save(self, *args, **kwargs):

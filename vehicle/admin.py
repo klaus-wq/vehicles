@@ -1,6 +1,14 @@
+from datetime import datetime
+
+import pytz
 from django.contrib import admin
+from django.contrib.gis.geos import Point
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin, ExportActionMixin
 
 from authentication.models import Manager, CustomUser
+from telemetry.models import TelemetryTrip, TelemetryPoint
+from telemetry.utils.geocoder import get_address, get_coordinates
 from .models import Vehicle, Brand, Enterprise, Driver, DriverVehicle
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
@@ -40,8 +48,13 @@ class CustomUserAdmin(UserAdmin):
             return list()
         return super(CustomUserAdmin, self).get_inline_instances(request, obj)
 
-class EnterpriseAdmin(ManagerPermissionAdmin):
-    list_display = ('id', 'name', 'city', 'address', 'phone')
+class EnterpriseResource(resources.ModelResource):
+    class Meta:
+        model = Enterprise
+
+class EnterpriseAdmin(ManagerPermissionAdmin, ImportExportModelAdmin, ExportActionMixin):
+    resource_class = EnterpriseResource
+    list_display = ('id', 'name', 'city', 'address', 'phone', 'timezone')
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -77,7 +90,30 @@ class EnterpriseAdmin(ManagerPermissionAdmin):
             if hasattr(request.user, 'manager'):
                 obj.managers.add(request.user.manager)
 
-class VehicleAdmin(ManagerPermissionAdmin):
+class VehicleResource(resources.ModelResource):
+    def __init__(self, manager=None):
+        super().__init__()
+        self.manager = manager
+
+    def skip_row(self, instance, original, row, import_context=None):
+        if self.manager and instance.enterprise:
+            if not self.manager.enterprises.filter(id=instance.enterprise.id).exists():
+                return True
+        return super().skip_row(instance, original, row, import_context)
+
+    def before_import_row(self, row, **kwargs):
+        vehicle = Vehicle.objects.get(car_number=row['vehicle'])
+        row['vehicle'] = vehicle.id
+
+    def dehydrate_vehicle(self, trip):
+        return trip.vehicle.car_number
+
+    class Meta:
+        model = Vehicle
+        import_id_fields = ('car_number', 'enterprise')
+
+class VehicleAdmin(ManagerPermissionAdmin, ImportExportModelAdmin, ExportActionMixin):
+    resource_class = VehicleResource
     list_display = ('id', 'car_number', 'enterprise', 'brand', 'price', 'year', 'mileage', 'fuel_type', 'transmission',
                     'color', 'created_at', 'get_drivers', 'get_active_driver')
 
@@ -187,6 +223,191 @@ class DriverVehicleAdmin(ManagerPermissionAdmin):
                 kwargs["queryset"] = Vehicle.objects.none()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
+class TelemetryPointResource:
+    class Meta:
+        model = TelemetryPoint
+
+class TelemetryTripResource(resources.ModelResource):
+    def __init__(self, user=None):
+        super().__init__()
+        self.user = user
+
+    def export(self, queryset=None, **kwargs):
+        dataset = super().export(queryset, **kwargs)
+
+        trip_ids = queryset.values_list('id', flat=True)
+        points = TelemetryPoint.objects.filter(
+            vehicle__in=[t.vehicle_id for t in queryset],
+            timestamp__range=(queryset.first().start_time, queryset.last().end_time)
+        )
+
+        points_resource = TelemetryPointResource()
+        points_dataset = points_resource.export(points)
+
+        return {'trips': dataset, 'points': points_dataset}
+
+    def before_import_row(self, row, **kwargs):
+        def create_point(address, timestamp, vehicle_id):
+            if not address:
+                raise ImportError("Адрес не указан")
+
+            coords = get_coordinates(address)
+            print(coords)
+            if coords is None:
+                raise ImportError(f"Не удалось определить координаты для адреса: {address}")
+
+            lat, lng = coords
+
+            existing = TelemetryPoint.objects.filter(
+                vehicle_id=vehicle_id,
+                location=Point(lng, lat),
+                timestamp=timestamp
+            ).first()
+
+            if existing:
+                return existing.id
+
+            try:
+                location = Point(lng, lat)
+            except Exception as e:
+                raise ImportError(f"Ошибка создания Point: {str(e)}")
+
+            point = TelemetryPoint.objects.create(
+                vehicle=vehicle,
+                location=location,
+                timestamp=timestamp
+            )
+            point.timestamp = timestamp
+
+            print(point)
+
+            point.save()
+            return point.id
+
+        if not self.user.is_superuser and self.user.manager:
+            allowed_enterprises = set(self.user.manager.enterprises.values_list("id", flat=True))
+        else:
+            allowed_enterprises = None
+
+        vehicle_id = row.get('vehicle')
+        if not vehicle_id:
+            raise ImportError("Не указан автомобиль")
+
+        try:
+            vehicle = Vehicle.objects.get(id=vehicle_id)
+        except Vehicle.DoesNotExist:
+            raise ImportError(f"Автомобиль {vehicle_id} не найден")
+
+        if allowed_enterprises is not None and vehicle.enterprise.id not in allowed_enterprises:
+            raise ImportError(f"Нет прав на добавление поездок для автомобиля {vehicle.car_number}")
+
+        start_time_str = row.get('start_time')
+        end_time_str = row.get('end_time')
+
+        if not all([start_time_str, end_time_str]):
+            raise ImportError("Обязательны поля start_time и end_time")
+
+        try:
+            start_time = datetime.strptime(start_time_str, "%Y-%m-%d %H:%M:%S")
+            end_time = datetime.strptime(end_time_str, "%Y-%m-%d %H:%M:%S")
+
+            tz = pytz.timezone(vehicle.enterprise.timezone)
+            if start_time.tzinfo is None:
+                start_time = tz.localize(start_time)
+            if end_time.tzinfo is None:
+                end_time = tz.localize(end_time)
+
+        except Exception as e:
+            raise ImportError(f"Ошибка парсинга дат: {str(e)}")
+
+        if start_time >= end_time:
+            raise ImportError("start_time должно быть раньше end_time")
+
+
+        start_address = row.get('start_address')
+        end_address = row.get('end_address')
+        start_point_id = create_point(start_address, start_time, vehicle_id)
+        end_point_id = create_point(end_address, end_time, vehicle_id)
+        if not start_point_id or not end_point_id:
+            raise ImportError("Не удалось создать одну или обе точки")
+        row['end_point'] = end_point_id
+        row['start_point'] = start_point_id
+        row['vehicle'] = vehicle.id
+        row['start_time'] = start_time
+        row['end_time'] = end_time
+
+    class Meta:
+        model = TelemetryTrip
+        skip_unchanged = True
+        # import_id_fields = ('id',)
+        fields = ('id', 'vehicle', 'start_point', 'end_point', 'start_time', 'end_time')
+
+    def dehydrate_start_point(self, trip):
+        if trip.start_point and trip.start_point.location:
+            return get_address(trip.start_point.location.y, trip.start_point.location.x)
+        return None
+
+    def dehydrate_end_point(self, trip):
+        if trip.end_point and trip.end_point.location:
+            return get_address(trip.end_point.location.y, trip.end_point.location.x)
+        return None
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        manager = Manager.objects.get(user=request.user)
+        return qs.filter(vehicle__enterprise__in=manager.enterprises.all())
+
+
+class TelemetryTripAdmin(ImportExportModelAdmin, ExportActionMixin):
+    resource_class = TelemetryTripResource
+    model = TelemetryTrip
+    list_display = [
+        "id",
+        "vehicle",
+        "start_point",
+        "end_point",
+        "start_time",
+        "end_time",
+    ]
+
+    def start_time(self, obj):
+        if obj.start_time:
+            return obj.start_time.strftime("%Y-%m-%d %H:%M:%S")
+        return None
+
+    def end_time(self, obj):
+        if obj.end_time:
+            return obj.end_time.strftime("%Y-%m-%d %H:%M:%S")
+        return None
+
+    def start_point(self, obj):
+        if not obj.start_point or not obj.start_point.point:
+            return None
+        lat, lng = obj.start_point.point.y, obj.start_point.point.x
+        start_address = get_address(lat, lng)
+        return start_address
+
+    def end_point(self, obj):
+        if not obj.end_point or not obj.end_point.point:
+            return None
+        lat, lng = obj.end_point.point.y, obj.end_point.point.x
+        end_address = get_address(lat, lng)
+        return end_address
+
+    start_time.short_description = "Время начала поездки"
+    end_time.short_description = "Время окончания поездки"
+    start_point.short_description = "Начальная точка"
+    end_point.short_description = "Конечная точка"
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        manager = Manager.objects.get(user=request.user)
+        return qs.filter(vehicle__enterprise__in=manager.enterprises.all())
+
 admin.site.register(Enterprise, EnterpriseAdmin)
 admin.site.register(Brand)
 admin.site.register(Vehicle, VehicleAdmin)
@@ -194,3 +415,4 @@ admin.site.register(Driver, DriverAdmin)
 admin.site.register(DriverVehicle, DriverVehicleAdmin)
 admin.site.register(Manager, ManagerAdmin)
 admin.site.register(CustomUser, CustomUserAdmin)
+admin.site.register(TelemetryTrip, TelemetryTripAdmin)

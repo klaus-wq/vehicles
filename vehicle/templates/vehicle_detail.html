@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Машина {{ vehicle.car_number }} — {{ enterprise.name }}{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+  <div class="d-flex justify-content-center align-items-center mb-4">
+    <h1 class="mb-0">
+      Автомобиль {{ vehicle.car_number }}
+    </h1>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card mb-4 shadow-sm card-wide">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Основные характеристики</h5>
+        </div>
+        <div class="card-body">
+          <table class="table table-borderless table-sm">
+            <tr>
+              <th>Государственный номер</th>
+              <td>{{ vehicle.car_number }}</td>
+            </tr>
+            <tr>
+              <th>Стоимость</th>
+              <td>{{ vehicle.price }} ₽</td>
+            </tr>
+            <tr>
+              <th>Год выпуска</th>
+              <td>{{ vehicle.year }} г.</td>
+            </tr>
+              <tr>
+              <th>Пробег</th>
+              <td>{{ vehicle.mileage|default:"—" }} км</td>
+            </tr>
+              <tr>
+              <th>Тип топлива</th>
+              <td>{{ vehicle.get_fuel_type_display }}</td>
+            </tr>
+              <tr>
+              <th>Коробка передач</th>
+              <td>{{ vehicle.get_transmission_display }}</td>
+            </tr>
+              <tr>
+              <th>Цвет</th>
+              <td>
+                {{ vehicle.color }}
+              </td>
+            </tr>
+            <tr>
+              <th>Бренд</th>
+              <td>{{ vehicle.brand.name }} ({{ vehicle.brand.get_vehicle_type_display }})</td>
+            </tr>
+            <tr>
+              <th>Дата добавления</th>
+              <td>
+                {% if vehicle.purchase_datetime %}
+                  {{ vehicle.purchase_datetime|date:"d.m.Y H:i" }}
+    <!--                  <small class="text-muted">(время предприятия: {{ enterprise.timezone }})</small>-->
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="card mb-4 shadow-sm card-wide">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Назначенные водители</h5>
+        </div>
+        <div class="card-body">
+          {% if drivers_json %}
+            <ul class="list-group list-group-flush">
+              {% for dv in drivers_json %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <strong>{{ dv.driver.last_name }} {{ dv.driver.first_name }}</strong>
+                    {% if dv.is_active %}
+                      <span class="badge bg-success">активный</span>
+                    {% endif %}
+                  </div>
+                  <small class="text-muted">ВУ: {{ dv.driver.license_number }}</small>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted">Водители не назначены</p>
+          {% endif %}
+        </div>
+      </div>
+
+        <div class="card mb-4 shadow-sm card-wide">
+          <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Поездки</h5>
+          </div>
+          <div class="card-body">
+            <form method="get" class="mb-4" id="filter-form">
+              {{ date_form.as_p }}
+              <button type="submit" class="btn btn-primary">Фильтровать</button>
+            </form>
+
+            <form method="post" action="{% url 'trips_map' enterprise_id=enterprise.id pk=vehicle.id %}" id="trips-form">
+                {% csrf_token %}
+              {% if trips %}
+                <ul class="list-group">
+                  {% for trip in trips %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="trip_ids" value="{{ trip.id }}" id="trip_{{ trip.id }}">
+                        <label class="form-check-label" for="trip_{{ trip.id }}">
+                          Поездка от {{ trip.start_time|date:"d.m.Y" }}
+                          {% if trip.end_time %} — {{ trip.end_time|date:"d.m.Y" }}{% endif %}
+                            {{ trip.start_address|default:"" }} — {{ trip.end_address|default:"" }}
+                        </label>
+                      </div>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p class="text-muted">Поездки не найдены</p>
+              {% endif %}
+                <button type="submit" form="trips-form" class="btn btn-primary btn-custom">Построить трек</button>
+            </form>
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<style>
+    .card-wide {
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .btn-custom {
+        margin-top: 14px;
+    }
+</style>
+
+{% endblock %}
+

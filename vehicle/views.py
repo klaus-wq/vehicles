@@ -1,20 +1,27 @@
+from datetime import datetime
+
 import pytz
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db.models import Count, ProtectedError
+from django import forms
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.utils import timezone
 from django.utils.html import format_html
 from django.views.generic import ListView, TemplateView, CreateView, DetailView
 from rest_framework import viewsets, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.filters import OrderingFilter
 from authentication.models import Manager
+from telemetry.models import TelemetryTrip
+from telemetry.serializers import TripSerializer
+from vehicle.admin import EnterpriseResource, VehicleResource, TelemetryTripResource
 from vehicle.models import Vehicle, Driver, Enterprise, DriverVehicle, Brand
 from vehicle.permissions import IsManagerOrReadOnly
 from vehicle.serializers import VehicleSerializer, DriverSerializer, EnterpriseSerializer, DriverVehicleSerializer
@@ -449,6 +456,64 @@ class VehicleDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return reverse_lazy('vehicle_list', kwargs={'enterprise_id': self.kwargs['enterprise_id']})
+
+class DateRangeForm(forms.Form):
+    start_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={'type': 'date'}),
+        label="Дата начала"
+    )
+    end_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={'type': 'date'}),
+        label="Дата окончания"
+    )
+
+class VehicleDetailView(LoginRequiredMixin, DetailView):
+    template_name = "vehicle_detail.html"
+    permission_classes = [IsManagerOrReadOnly]
+    context_object_name = "vehicle"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.enterprise = get_object_or_404(Enterprise, id=self.kwargs['enterprise_id'])
+        if not request.user.is_superuser:
+            if not request.user.manager.enterprises.filter(id=self.enterprise.id).exists():
+                raise PermissionDenied("Доступ запрещён")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(
+            Vehicle,
+            id=self.kwargs["pk"],
+            enterprise=self.enterprise
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        vehicle = self.object
+
+        context["enterprise"] = self.enterprise
+        context['drivers_json'] = vehicle.vehicle_drivers.select_related("driver")
+
+        form = DateRangeForm(self.request.GET)
+        start_date = form['start_date'].value() if form.is_valid() else None
+        end_date = form['end_date'].value() if form.is_valid() else None
+
+        trips = vehicle.trips.all()
+        if start_date:
+            trips = trips.filter(start_time__gte=start_date)
+        if end_date:
+            trips = trips.filter(start_time__lte=end_date)
+
+        trips_serialized = TripSerializer(
+            trips,
+            many=True
+        ).data
+
+        context["trips"] = trips_serialized
+        context["date_form"] = form
+
+        return context
 
 class BrandListView(LoginRequiredMixin, ListView):
     model = Brand
