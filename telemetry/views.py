@@ -24,7 +24,7 @@ from tablib import Dataset
 
 from authentication.models import Manager
 from vehicle.admin import EnterpriseResource, VehicleResource, TelemetryTripResource, TelemetryPointResource
-from vehicle.models import Vehicle, Enterprise
+from vehicle.models import Vehicle, Enterprise, Driver, DriverVehicle
 from vehicle.permissions import IsManagerOrReadOnly
 from .models import TelemetryPoint, TelemetryTrip
 from .serializers import TelemetryPointSerializer, TelemetryPointGeoSerializer, TripSerializer
@@ -156,8 +156,14 @@ class TripExportView(APIView):
         with ZipFile(buffer, "w") as zip_file:
             if format == 'json':
                 zip_file.writestr("trips.json", trips_dataset.json)
+                # zip_file.writestr("drivers.json", DriverResource().export(Driver.objects.all()).json)
+                # zip_file.writestr("driver_vehicles.json",
+                #                   DriverVehicleResource().export(DriverVehicle.objects.all()).json)
             else:
                 zip_file.writestr("trips.csv", trips_dataset.csv)
+                # zip_file.writestr("drivers.csv", DriverResource().export(Driver.objects.all()).csv)
+                # zip_file.writestr("driver_vehicles.csv",
+                #                   DriverVehicleResource().export(DriverVehicle.objects.all()).csv)
 
             for trip in queryset:
                 points_qs = TelemetryPoint.objects.filter(

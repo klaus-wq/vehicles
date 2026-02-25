@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.contrib.gis.geos import Point
 from import_export import resources, fields
 from import_export.admin import ImportExportModelAdmin, ExportActionMixin
+from import_export.widgets import ForeignKeyWidget
 
 from authentication.models import Manager, CustomUser
 from telemetry.models import TelemetryTrip, TelemetryPoint
@@ -360,7 +361,7 @@ class TelemetryTripResource(resources.ModelResource):
     class Meta:
         model = TelemetryTrip
         skip_unchanged = True
-        import_id_fields = ('id',)
+        # import_id_fields = ('id',)
         fields = ('id', 'vehicle', 'start_point', 'end_point', 'start_time', 'end_time')
 
     def dehydrate_start_point(self, trip):
@@ -428,6 +429,46 @@ class TelemetryTripAdmin(ImportExportModelAdmin, ExportActionMixin):
             return qs
         manager = Manager.objects.get(user=request.user)
         return qs.filter(vehicle__enterprise__in=manager.enterprises.all())
+
+# class DriverResource(resources.ModelResource):
+#     class Meta:
+#         model = Driver
+#         import_id_fields = ('license_number',)
+#         fields = (
+#             'license_number',
+#             'first_name',
+#             'last_name',
+#             'enterprise',
+#         )
+#         skip_unchanged = True
+#
+# class DriverVehicleResource(resources.ModelResource):
+#     driver = fields.Field(
+#         column_name='driver_license',
+#         attribute='driver',
+#         widget=ForeignKeyWidget(Driver, 'license_number')
+#     )
+#
+#     vehicle = fields.Field(
+#         column_name='car_number',
+#         attribute='vehicle',
+#         widget=ForeignKeyWidget(Vehicle, 'car_number')
+#     )
+#
+#     def dehydrate_driver_license(self, obj):
+#         return obj.driver.license_number if obj.driver else ''
+#
+#     def dehydrate_car_number(self, obj):
+#         return obj.vehicle.car_number if obj.vehicle else ''
+#
+#     class Meta:
+#         model = DriverVehicle
+#         fields = (
+#             'driver_license',
+#             'car_number',
+#             'is_active',
+#         )
+#         skip_unchanged = True
 
 admin.site.register(Enterprise, EnterpriseAdmin)
 admin.site.register(Brand)
