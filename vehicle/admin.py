@@ -3,7 +3,7 @@ from datetime import datetime
 import pytz
 from django.contrib import admin
 from django.contrib.gis.geos import Point
-from import_export import resources
+from import_export import resources, fields
 from import_export.admin import ImportExportModelAdmin, ExportActionMixin
 
 from authentication.models import Manager, CustomUser
@@ -13,7 +13,7 @@ from .models import Vehicle, Brand, Enterprise, Driver, DriverVehicle
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.db.models import Q
-
+from import_export.exceptions import ImportError
 from .permissions import ManagerPermissionAdmin
 
 class ManagerInline(admin.StackedInline):
@@ -101,16 +101,8 @@ class VehicleResource(resources.ModelResource):
                 return True
         return super().skip_row(instance, original, row, import_context)
 
-    def before_import_row(self, row, **kwargs):
-        vehicle = Vehicle.objects.get(car_number=row['vehicle'])
-        row['vehicle'] = vehicle.id
-
-    def dehydrate_vehicle(self, trip):
-        return trip.vehicle.car_number
-
     class Meta:
         model = Vehicle
-        import_id_fields = ('car_number', 'enterprise')
 
 class VehicleAdmin(ManagerPermissionAdmin, ImportExportModelAdmin, ExportActionMixin):
     resource_class = VehicleResource
@@ -223,28 +215,57 @@ class DriverVehicleAdmin(ManagerPermissionAdmin):
                 kwargs["queryset"] = Vehicle.objects.none()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-class TelemetryPointResource:
+class TelemetryPointResource(resources.ModelResource):
+    trip_id = fields.Field(
+        column_name='trip_id',
+        attribute='trip_id',
+        readonly=True
+    )
+    points = fields.Field(column_name='points', readonly=True)
+
+    def dehydrate_points(self, trip):
+        points = TelemetryPoint.objects.filter(
+            vehicle=trip.vehicle,
+            timestamp__range=(trip.start_time, trip.end_time)
+        ).order_by('timestamp').values('timestamp', 'location')
+
+        result = []
+        for p in points:
+            loc = p['location']
+            if loc:
+                coords = [loc.x, loc.y]  # lng, lat
+            else:
+                coords = None
+            result.append({
+                'timestamp': p['timestamp'].isoformat(),
+                'location': coords,
+            })
+        return result
+
+    def dehydrate_trip_id(self, obj):
+        trip = TelemetryTrip.objects.filter(
+            vehicle=obj.vehicle,
+            start_time__lte=obj.timestamp,
+            end_time__gte=obj.timestamp
+        ).first()
+        return trip.id if trip else None
+
     class Meta:
         model = TelemetryPoint
+        fields = (
+            'id',
+            'vehicle',
+            'timestamp',
+            'speed',
+            'location',
+            'trip_id',
+        )
+        export_order = fields
 
 class TelemetryTripResource(resources.ModelResource):
     def __init__(self, user=None):
         super().__init__()
         self.user = user
-
-    def export(self, queryset=None, **kwargs):
-        dataset = super().export(queryset, **kwargs)
-
-        trip_ids = queryset.values_list('id', flat=True)
-        points = TelemetryPoint.objects.filter(
-            vehicle__in=[t.vehicle_id for t in queryset],
-            timestamp__range=(queryset.first().start_time, queryset.last().end_time)
-        )
-
-        points_resource = TelemetryPointResource()
-        points_dataset = points_resource.export(points)
-
-        return {'trips': dataset, 'points': points_dataset}
 
     def before_import_row(self, row, **kwargs):
         def create_point(address, timestamp, vehicle_id):
@@ -339,7 +360,7 @@ class TelemetryTripResource(resources.ModelResource):
     class Meta:
         model = TelemetryTrip
         skip_unchanged = True
-        # import_id_fields = ('id',)
+        import_id_fields = ('id',)
         fields = ('id', 'vehicle', 'start_point', 'end_point', 'start_time', 'end_time')
 
     def dehydrate_start_point(self, trip):

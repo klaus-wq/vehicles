@@ -1,7 +1,13 @@
+import json
+from io import BytesIO
+from zipfile import ZipFile
+
 import folium
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.gis.geos import Point
+from django.db import transaction
 from django.shortcuts import redirect
 from django.views import View
 from django.views.generic import TemplateView
@@ -17,7 +23,7 @@ import pytz
 from tablib import Dataset
 
 from authentication.models import Manager
-from vehicle.admin import EnterpriseResource, VehicleResource, TelemetryTripResource
+from vehicle.admin import EnterpriseResource, VehicleResource, TelemetryTripResource, TelemetryPointResource
 from vehicle.models import Vehicle, Enterprise
 from vehicle.permissions import IsManagerOrReadOnly
 from .models import TelemetryPoint, TelemetryTrip
@@ -142,10 +148,47 @@ class TripExportView(APIView):
         if not queryset.exists():
             return Response({"message": "Нет поездок за период"}, status=200)
 
-        resource = TelemetryTripResource()
-        dataset = resource.export(queryset)
+        trip_resource = TelemetryTripResource()
 
-        return prepare_response(dataset, format, "trips")
+        trips_dataset = trip_resource.export(queryset)
+
+        buffer = BytesIO()
+        with ZipFile(buffer, "w") as zip_file:
+            if format == 'json':
+                zip_file.writestr("trips.json", trips_dataset.json)
+            else:
+                zip_file.writestr("trips.csv", trips_dataset.csv)
+
+            for trip in queryset:
+                points_qs = TelemetryPoint.objects.filter(
+                    vehicle=trip.vehicle,
+                    timestamp__range=(trip.start_time, trip.end_time)
+                ).order_by("timestamp")
+
+                if not points_qs.exists():
+                    continue
+
+                points_list = [
+                    {
+                        "timestamp": p.timestamp.isoformat(),
+                        "location": [p.location.x, p.location.y],
+                    }
+                    for p in points_qs
+                ]
+
+                data = {
+                    "trip_id": trip.id,
+                    "points": points_list
+                }
+
+                filename = f"points/trip_{trip.id}.json"
+                zip_file.writestr(filename, json.dumps(data, ensure_ascii=False, indent=2))
+
+        buffer.seek(0)
+        response = HttpResponse(buffer.read(), content_type="application/zip")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+        response["Content-Disposition"] = f'attachment; filename="trips_export_{timestamp}.zip"'
+        return response
 
 def prepare_import_response(result, dataset):
     if result.has_errors():
@@ -310,6 +353,158 @@ class EnterpriseImportView(APIView):
         #     return Response(
         #         {"success": "Успешный импорт" + 'Новые:' + totals_new + 'Ошибок:' + error_count},
         #         status=status.HTTP_201_CREATED)
+
+class FullTripWithTrackImportView(APIView):
+    permission_classes = [IsManagerOrReadOnly]
+
+    def post(self, request):
+        import_format = request.POST.get('import_format', 'json').lower()
+        if import_format not in ['json', 'csv']:
+            return Response({"error": "Поддерживаемые форматы: json, csv"}, status=400)
+
+        if 'file' not in request.FILES:
+            return Response({"error": "Ожидается файл в поле 'file'"}, status=400)
+
+        file = request.FILES['file']
+
+        try:
+            raw = file.read().decode('utf-8')
+            data = json.loads(raw)
+        except Exception as e:
+            return Response({"error": f"Ошибка чтения/парсинга JSON: {str(e)}"}, status=400)
+
+        trips_data = data.get("trips")
+        if not isinstance(trips_data, list):
+            return Response({"error": "Ожидается ключ 'trips' с массивом поездок"}, status=400)
+
+        stats = {
+            "created": 0,
+            "updated": 0,
+            # "skipped": 0,
+            "points_imported": 0,
+            "errors": 0,
+            "error_details": []
+        }
+
+        overwrite = request.POST.get('overwrite', 'false').lower() == 'true'
+
+        for idx, trip_row in enumerate(trips_data, 1):
+            try:
+                with transaction.atomic():
+                    self._import_single_trip(request, trip_row, overwrite, stats)
+            except Exception as e:
+                stats["errors"] += 1
+                stats["error_details"].append(f"Поездка #{idx}: {str(e)}")
+
+        status_code = status.HTTP_201_CREATED if stats["created"] > 0 else status.HTTP_200_OK
+        if stats["errors"] > 0:
+            status_code = status.HTTP_207_MULTI_STATUS
+
+        return Response({
+            "status": "success" if stats["errors"] == 0 else "partial",
+            **stats
+        }, status=status_code)
+
+    def _import_single_trip(self, request, row, overwrite_allowed, stats):
+        vehicle_id = row["vehicle_id"]
+        start_time_str = row["start_time"]
+        end_time_str   = row["end_time"]
+        points_data    = row.get("points", [])
+
+        vehicle = Vehicle.objects.select_related('enterprise').get(id=vehicle_id)
+
+        # Проверка доступа
+        if not request.user.is_superuser:
+            manager = request.user.manager
+            if vehicle.enterprise not in manager.enterprises.all():
+                raise PermissionError("Нет доступа к этому автомобилю")
+
+        # Парсинг дат (ожидаем ISO 8601)
+        try:
+            start_dt = datetime.fromisoformat(start_time_str.replace('Z', '+00:00'))
+            end_dt   = datetime.fromisoformat(end_time_str.replace('Z', '+00:00'))
+        except Exception as e:
+            raise ValueError(f"Ошибка парсинга дат: {str(e)}")
+
+        if start_dt >= end_dt:
+            raise ValueError("start_time должно быть строго раньше end_time")
+
+        # Приводим к UTC, если вдруг не в UTC
+        if start_dt.tzinfo is None:
+            tz = pytz.timezone(vehicle.enterprise.timezone or "UTC")
+            start_dt = tz.localize(start_dt).astimezone(pytz.UTC)
+        if end_dt.tzinfo is None:
+            tz = pytz.timezone(vehicle.enterprise.timezone or "UTC")
+            end_dt = tz.localize(end_dt).astimezone(pytz.UTC)
+
+        # Поиск существующей поездки
+        existing_trip = TelemetryTrip.objects.filter(
+            vehicle=vehicle,
+            start_time=start_dt,
+            end_time=end_dt
+        ).first()
+
+        if existing_trip:
+            # if not overwrite_allowed:
+            #     stats["skipped"] += 1
+            #     return
+            # Перезапись — удаляем старые точки
+            TelemetryPoint.objects.filter(
+                vehicle=vehicle,
+                timestamp__range=(start_dt, end_dt)
+            ).delete()
+            trip = existing_trip
+            stats["updated"] += 1
+        else:
+            trip = TelemetryTrip.objects.create(
+                vehicle=vehicle,
+                start_time=start_dt,
+                end_time=end_dt
+            )
+            stats["created"] += 1
+
+        # Удаляем все точки в диапазоне (на всякий случай, если были ещё)
+        TelemetryPoint.objects.filter(
+            vehicle=vehicle,
+            timestamp__gte=start_dt,
+            timestamp__lte=end_dt
+        ).delete()
+
+        created_points = []
+
+        for pt in points_data:
+            ts_str = pt["timestamp"]
+            try:
+                ts = datetime.fromisoformat(ts_str.replace('Z', '+00:00'))
+                if ts.tzinfo is None:
+                    tz = pytz.timezone(vehicle.enterprise.timezone or "UTC")
+                    ts = tz.localize(ts).astimezone(pytz.UTC)
+            except Exception as e:
+                raise ValueError(f"Ошибка парсинга timestamp: {ts_str} → {str(e)}")
+
+            try:
+                lng, lat = pt["location"]
+                if not (-180 <= lng <= 180 and -90 <= lat <= 90):
+                    raise ValueError("Некорректные координаты")
+                location = Point(lng, lat, srid=4326)
+            except Exception as e:
+                raise ValueError(f"Ошибка координат: {str(e)}")
+
+            point = TelemetryPoint.objects.create(
+                vehicle=vehicle,
+                location=location,
+            )
+            point.save()
+            point.timestamp = ts
+            point.save()
+            created_points.append(point)
+            stats["points_imported"] += 1
+
+        if created_points:
+            created_points.sort(key=lambda p: p.timestamp)
+            trip.start_point = created_points[0]
+            trip.end_point = created_points[-1]
+            trip.save(update_fields=['start_point', 'end_point'])
 
 class EnterpriseImportFormView(LoginRequiredMixin, TemplateView):
     template_name = "import_form.html"

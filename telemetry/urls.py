@@ -1,6 +1,6 @@
 from telemetry.views import TrackAPIView, TracksAPIView, TripsAPIView, EnterpriseExportView, \
     VehicleExportView, TripExportView, EnterpriseImportFormView, VehicleImportFormView, TripImportFormView, \
-    EnterpriseImportView, VehicleImportView, TripImportView
+    EnterpriseImportView, VehicleImportView, TripImportView, FullTripWithTrackImportView
 from django.urls import path
 
 from vehicle.models import Vehicle
@@ -27,5 +27,5 @@ urlpatterns = [
     path('import/trips/', TripImportFormView.as_view(), name='trips_import'),
     path('api/import/enterprises/', EnterpriseImportView.as_view(), name='enterprises_import_api'),
     path('api/import/vehicles/', VehicleImportView.as_view(), name='vehicles_import_api'),
-    path('api/import/trips/', TripImportView.as_view(), name='trips_import_api'),
+    path('api/import/trips/', FullTripWithTrackImportView.as_view(), name='trips_import_api'),
 ]
