@@ -1,3 +1,4 @@
+import uuid
 from zoneinfo import available_timezones
 
 from django.core.exceptions import ValidationError
@@ -36,6 +37,10 @@ class Enterprise(models.Model):
         choices=sorted([(tz, tz) for tz in available_timezones()]),
         default=settings.TIME_ZONE,
     )
+    guid = models.UUIDField(
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,)
 
     class Meta:
         verbose_name = 'Предприятие'
@@ -127,6 +132,10 @@ class Brand(models.Model):
     seating_capacity = models.PositiveSmallIntegerField(
         verbose_name='Количество мест'
     )
+    guid = models.UUIDField(
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,)
 
     class Meta:
         verbose_name = 'Бренд'
@@ -215,6 +224,11 @@ class Vehicle(models.Model):
         verbose_name="Время покупки",
         null=True,
         blank=True
+    )
+    guid = models.UUIDField(
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
     )
 
     class Meta:

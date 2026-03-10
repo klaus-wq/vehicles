@@ -115,7 +115,7 @@ class TripExportView(APIView):
 
         start = request.query_params.get('start')
         end = request.query_params.get('end')
-        vehicle_id = request.query_params.get('vehicle_id')
+        vehicle_guid = request.query_params.get('vehicle_guid')
 
         if not all([start, end]):
             return Response({"error": "Обязательны параметры start и end"}, status=400)
@@ -139,8 +139,8 @@ class TripExportView(APIView):
                 vehicle__enterprise__in=manager.enterprises.all()
             )
 
-        if vehicle_id is not None:
-            vehicle = Vehicle.objects.get(id=vehicle_id)
+        if vehicle_guid is not None:
+            vehicle = Vehicle.objects.get(guid=vehicle_guid)
             queryset = queryset.filter(
                 vehicle=vehicle,
             )
@@ -178,16 +178,17 @@ class TripExportView(APIView):
                     {
                         "timestamp": p.timestamp.isoformat(),
                         "location": [p.location.x, p.location.y],
+                        'id': p.id
                     }
                     for p in points_qs
                 ]
 
                 data = {
-                    "trip_id": trip.id,
+                    "trip_guid": str(trip.guid),
                     "points": points_list
                 }
 
-                filename = f"points/trip_{trip.id}.json"
+                filename = f"points/trip_{trip.guid}.json"
                 zip_file.writestr(filename, json.dumps(data, ensure_ascii=False, indent=2))
 
         buffer.seek(0)
@@ -412,12 +413,12 @@ class FullTripWithTrackImportView(APIView):
         }, status=status_code)
 
     def _import_single_trip(self, request, row, overwrite_allowed, stats):
-        vehicle_id = row["vehicle_id"]
+        vehicle_guid = row["vehicle_guid"]
         start_time_str = row["start_time"]
         end_time_str   = row["end_time"]
         points_data    = row.get("points", [])
 
-        vehicle = Vehicle.objects.select_related('enterprise').get(id=vehicle_id)
+        vehicle = Vehicle.objects.select_related('enterprise').get(guid=vehicle_guid)
 
         # Проверка доступа
         if not request.user.is_superuser:

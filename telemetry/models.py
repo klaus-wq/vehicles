@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.contrib.gis.db import models as gis_models
 from django.core.exceptions import ValidationError
@@ -12,6 +14,10 @@ class TelemetryPoint(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     speed = models.PositiveSmallIntegerField(null=True, blank=True)
     location = gis_models.PointField(srid=4326, null=True, blank=True)
+    guid = models.UUIDField(
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,)
 
     class Meta:
         indexes = [
@@ -50,6 +56,10 @@ class TelemetryTrip(models.Model):
         blank=True,verbose_name="Время начала")
     end_time = models.DateTimeField(null=True,
         blank=True, verbose_name="Время окончания")
+    guid = models.UUIDField(
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,)
 
     def clean(self):
         if (
