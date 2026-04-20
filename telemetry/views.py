@@ -3,12 +3,13 @@ from io import BytesIO
 from zipfile import ZipFile
 
 import folium
+import gpxpy
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.gis.geos import Point
 from django.db import transaction
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic import TemplateView
 from rest_framework.exceptions import PermissionDenied
@@ -18,7 +19,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from django.http import Http404, HttpResponse, HttpResponseRedirect
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 from tablib import Dataset
 
@@ -366,23 +367,13 @@ class FullTripWithTrackImportView(APIView):
 
     def post(self, request):
         import_format = request.POST.get('import_format', 'json').lower()
-        if import_format not in ['json', 'csv']:
-            return Response({"error": "Поддерживаемые форматы: json, csv"}, status=400)
+        if import_format not in ['json', 'csv', 'gpx']:
+            return Response({"error": "Поддерживаемые форматы: json, csv, gpx"}, status=400)
 
         if 'file' not in request.FILES:
             return Response({"error": "Ожидается файл в поле 'file'"}, status=400)
 
         file = request.FILES['file']
-
-        try:
-            raw = file.read().decode('utf-8')
-            data = json.loads(raw)
-        except Exception as e:
-            return Response({"error": f"Ошибка чтения/парсинга JSON: {str(e)}"}, status=400)
-
-        trips_data = data.get("trips")
-        if not isinstance(trips_data, list):
-            return Response({"error": "Ожидается ключ 'trips' с массивом поездок"}, status=400)
 
         stats = {
             "created": 0,
@@ -395,13 +386,31 @@ class FullTripWithTrackImportView(APIView):
 
         overwrite = request.POST.get('overwrite', 'false').lower() == 'true'
 
-        for idx, trip_row in enumerate(trips_data, 1):
-            try:
-                with transaction.atomic():
-                    self._import_single_trip(request, trip_row, overwrite, stats)
-            except Exception as e:
-                stats["errors"] += 1
-                stats["error_details"].append(f"Поездка #{idx}: {str(e)}")
+        try:
+            if import_format == 'gpx':
+                return self._import_gpx(request, file, overwrite, stats)
+            else:
+                raw = file.read().decode('utf-8')
+                data = json.loads(raw)
+
+                trips_data = data.get("trips")
+                if not isinstance(trips_data, list):
+                    return Response({"error": "Ожидается ключ 'trips' с массивом поездок"}, status=400)
+
+                for idx, trip_row in enumerate(trips_data, 1):
+                    try:
+                        with transaction.atomic():
+                            self._import_single_trip(request, trip_row, overwrite, stats)
+                    except Exception as e:
+                        stats["errors"] += 1
+                        stats["error_details"].append(f"Поездка #{idx}: {str(e)}")
+
+        except json.JSONDecodeError as e:
+            return Response({"error": f"Ошибка парсинга JSON: {str(e)}"}, status=400)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response({"error": f"{str(e)}"}, status=400)
 
         status_code = status.HTTP_201_CREATED if stats["created"] > 0 else status.HTTP_200_OK
         if stats["errors"] > 0:
@@ -411,6 +420,166 @@ class FullTripWithTrackImportView(APIView):
             "status": "success" if stats["errors"] == 0 else "partial",
             **stats
         }, status=status_code)
+
+    def _import_gpx(self, request, file, overwrite_allowed, stats):
+        gpx = gpxpy.parse(file.read())
+
+        vehicle_id = None
+
+        if gpx.metadata_extensions:
+            for ext in gpx.metadata_extensions:
+                if hasattr(ext, 'tag') and ext.tag.endswith('vehicle_id'):
+                    vehicle_id = ext.text
+                    break
+                if hasattr(ext, 'find'):
+                    elem = ext.find('.//vehicle_id')
+                    if elem is not None and elem.text:
+                        vehicle_id = elem.text
+                        break
+
+        if not vehicle_id:
+            vehicle_id = request.POST.get('vehicle_id')
+
+        if not vehicle_id:
+            raise ValueError("Для GPX импорта требуется параметр vehicle_id")
+
+        print(vehicle_id)
+        vehicle = Vehicle.objects.get(id=vehicle_id)
+
+        if not request.user.is_superuser:
+            manager = request.user.manager
+            if vehicle.enterprise not in manager.enterprises.all():
+                raise PermissionError("Нет доступа к этому автомобилю")
+
+        all_points = []
+
+        for idx, track in enumerate(gpx.tracks):
+            for segment in track.segments:
+                for pt_idx, point in enumerate(segment.points):
+                    timestamp = point.time
+                    if timestamp is None:
+                        timestamp = datetime.now(pytz.UTC) + timedelta(seconds=idx * 60)
+                    all_points.append({
+                        'latitude': point.latitude,
+                        'longitude': point.longitude,
+                        'timestamp': timestamp,
+                    })
+
+        if not all_points:
+            raise ValueError("GPX файл не содержит точек трека")
+
+        all_points.sort(key=lambda p: p['timestamp'])
+
+        start_dt = all_points[0]['timestamp']
+        end_dt = all_points[-1]['timestamp']
+
+        try:
+            if start_dt.tzinfo is None:
+                start_dt = datetime.fromisoformat(start_dt.isoformat())
+            if end_dt.tzinfo is None:
+                end_dt = datetime.fromisoformat(end_dt.isoformat())
+        except Exception as e:
+            raise ValueError(f"Ошибка парсинга дат: {str(e)}")
+
+        if start_dt >= end_dt:
+            raise ValueError("start_time должно быть раньше end_time")
+
+        if start_dt.tzinfo is None:
+            tz = pytz.timezone(vehicle.enterprise.timezone or "UTC")
+            start_dt = tz.localize(start_dt).astimezone(pytz.UTC)
+        if end_dt.tzinfo is None:
+            tz = pytz.timezone(vehicle.enterprise.timezone or "UTC")
+            end_dt = tz.localize(end_dt).astimezone(pytz.UTC)
+
+        existing_trip = TelemetryTrip.objects.filter(
+            vehicle=vehicle,
+            # start_time=start_dt,
+            # end_time=end_dt
+        ).first()
+
+        if existing_trip:
+            if not overwrite_allowed:
+                stats["errors"] += 1
+                stats["error_details"].append("Поездка уже существует")
+                return render(
+                    request=request,
+                    template_name="error.html",
+                    status=409,
+                    context={
+                        "title": "Ошибка: 409",
+                        "error_message": "Поездка уже существует",
+                        'status': 409
+                    },
+                )
+                # return Response(stats, status=status.HTTP_409_CONFLICT)
+
+            TelemetryPoint.objects.filter(
+                vehicle=vehicle,
+                timestamp__range=(start_dt, end_dt)
+            ).delete()
+            trip = existing_trip
+            stats["updated"] += 1
+        else:
+            trip = TelemetryTrip.objects.create(
+                vehicle=vehicle,
+                start_time=start_dt,
+                end_time=end_dt,
+            )
+            stats["created"] += 1
+
+        created_points = []
+        for pt in all_points:
+            ts = pt['timestamp']
+
+            try:
+                if ts.tzinfo is None:
+                    ts = datetime.fromisoformat(ts.isoformat())
+                if ts.tzinfo is None:
+                    tz = pytz.timezone(vehicle.enterprise.timezone or "UTC")
+                    ts = tz.localize(ts).astimezone(pytz.UTC)
+            except Exception as e:
+                raise ValueError(f"Ошибка парсинга timestamp: {ts} → {str(e)}")
+
+            try:
+                lng = pt['longitude']
+                lat = pt['latitude']
+                if not (-180 <= lng <= 180 and -90 <= lat <= 90):
+                    return render(
+                        request=request,
+                        template_name="error.html",
+                        status=400,
+                        context={
+                            "title": "Ошибка: 400",
+                            "error_message": "Некорректные координаты",
+                            'status': 400
+                        },
+                    )
+                    # raise ValueError("Некорректные координаты")
+                location = Point(lng, lat, srid=4326)
+            except Exception as e:
+                raise ValueError(f"{str(e)}")
+
+            point = TelemetryPoint.objects.create(
+                vehicle=vehicle,
+                location=location,
+                # timestamp=ts,
+            )
+            point.save()
+            point.timestamp = ts
+            point.save()
+            created_points.append(point)
+            stats["points_imported"] += 1
+
+        if created_points:
+            created_points.sort(key=lambda p: p.timestamp)
+            trip.start_point = created_points[0]
+            trip.end_point = created_points[-1]
+            trip.save(update_fields=['start_point', 'end_point'])
+
+        return Response({
+            "status": "success",
+            **stats
+        }, status=status.HTTP_201_CREATED if stats["created"] > 0 else status.HTTP_200_OK)
 
     def _import_single_trip(self, request, row, overwrite_allowed, stats):
         vehicle_guid = row["vehicle_guid"]

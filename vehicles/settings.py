@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_bootstrap5',
     'import_export',
+    'reports'
 ]
 
 REST_FRAMEWORK = {
@@ -171,6 +172,16 @@ LOGIN_REDIRECT_URL = '/enterprises/'
 LOGOUT_REDIRECT_URL = '/'
 
 LOGIN_URL = "/"
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+XHTML2PDF_CONFIG = {
+    'font.path': [
+        str(BASE_DIR / 'static' / 'fonts'),
+    ],
+}
 
 import sys
 

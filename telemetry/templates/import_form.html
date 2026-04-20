@@ -6,7 +6,7 @@
 {% block content %}
 <div class="container mt-5">
   <h2>Импорт {{ model_name }}</h2>
-  <p>Поддерживаемые форматы: JSON, CSV</p>
+  <p>Поддерживаемые форматы: JSON, CSV, GPX</p>
 
   <form method="post" enctype="multipart/form-data" 
         action="{% url url_name %}" 
@@ -15,7 +15,7 @@
     
     <div class="mb-3">
       <label for="file" class="form-label">Выберите файл</label>
-      <input type="file" name="file" id="file" class="form-control" accept=".json,.csv" required>
+      <input type="file" name="file" id="file" class="form-control" accept=".json,.csv,.gpx" required>
     </div>
 
     <div class="mb-3">
@@ -23,6 +23,7 @@
       <select name="import_format" class="form-select">
         <option value="json">JSON</option>
         <option value="csv">CSV</option>
+          <option value="gpx">GPX</option>
       </select>
     </div>
 

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Обёртка на всю ширину с боковыми отступами -->
+<div class="reports-page-wrapper">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Создать отчёт</h1>
+    <a href="{% url 'reports:reports_list' %}" class="btn btn-outline-secondary btn-lg">
+      <i class="bi bi-arrow-left me-2"></i>Назад к списку
+    </a>
+  </div>
+
+  <form method="post" class="needs-validation" novalidate>
+    {% csrf_token %}
+
+    <!-- Основная информация -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-body">
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Название отчёта</label>
+            <input type="text" name="name" class="form-control form-control-lg"
+                   required placeholder="Например: Пробег за март 2024">
+            <div class="invalid-feedback">Введите название отчёта</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Тип отчёта</label>
+            <select name="report_type" class="form-select form-select-lg" required>
+              <option value="">Выберите тип</option>
+              <option value="MILEAGE">Пробег автомобиля</option>
+              <option value="DRIVER_ASSIGNMENT">Назначение водителей</option>
+            </select>
+            <div class="invalid-feedback">Выберите тип отчёта</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Период</label>
+            <select name="period" class="form-select form-select-lg" required>
+              <option value="">Выберите период</option>
+              <option value="DAY">По дням</option>
+              <option value="MONTH">По месяцам</option>
+              <option value="YEAR">По годам</option>
+            </select>
+            <div class="invalid-feedback">Выберите период</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Начало периода</label>
+            <input type="date" name="start_date" class="form-control form-control-lg" required>
+            <div class="invalid-feedback">Укажите начальную дату</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Конец периода</label>
+            <input type="date" name="end_date" class="form-control form-control-lg" required>
+            <div class="invalid-feedback">Укажите конечную дату</div>
+          </div>
+
+            <div class="col-md-6">
+            <label class="form-label fw-semibold">Предприятие</label>
+            <select name="enterprise_id" class="form-select form-select-lg" id="id_enterprise">
+              <option value="">Все предприятия</option>
+              {% for enterprise in enterprises %}
+                <option value="{{ enterprise.id }}">{{ enterprise.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Выбор автомобилей -->
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Автомобили</label>
+            <select name="vehicle_ids" class="form-select form-select-lg" id="id_vehicles" multiple size="5">
+              {% for vehicle in vehicles %}
+                <option value="{{ vehicle.id }}">
+                  {{ vehicle.car_number }} — {{ vehicle.id }} {{ vehicle.model }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+        <div class="d-flex gap-2 justify-content-end">
+          <a href="{% url 'reports:reports_list' %}" class="btn btn-outline-secondary btn-lg">
+            <i class="bi bi-x-circle me-2"></i>Отмена
+          </a>
+          <button type="submit" class="btn btn-success btn-lg">
+            <i class="bi bi-check-lg me-2"></i>Сформировать отчёт
+          </button>
+    </div>
+
+  </form>
+
+</div>
+
+<!-- Стили для страницы отчётов -->
+<style>
+    .card {
+    max-width: 100%;
+    }
+
+  .reports-page-wrapper {
+    width: 100%;
+    padding-left: 3%;
+    padding-right: 3%;
+    padding-top: 20px;
+    padding-bottom: 40px;
+  }
+
+  /* Адаптивность для маленьких экранов */
+  @media (max-width: 768px) {
+    .reports-page-wrapper {
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+  }
+
+  /* Стили для мульти-селекта */
+  #id_vehicles {
+    height: 150px;
+  }
+</style>
+
+{% endblock %}

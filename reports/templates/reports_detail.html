@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="mb-0">{{ report.name }}</h1>
+  <div class="btn-group">
+    <a href="{% url 'reports:export_pdf' report.pk %}" class="btn btn-danger">
+      <i class="bi bi-file-earmark-pdf me-2"></i>PDF
+    </a>
+  </div>
+</div>
+
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <p><strong>Тип:</strong> {{ report.get_report_type_display }}</p>
+      <p><strong>Период:</strong> {{ report.get_period_display }}</p>
+      <p><strong>Даты:</strong> {{ report.start_date|date:"d.m.Y H:i" }} — {{ report.end_date|date:"d.m.Y H:i" }}</p>
+    </div>
+  </div>
+
+  {% if not report.result_data %}
+    <div class="alert alert-info">
+      Отчёт ещё формируется...
+    </div>
+  {% else %}
+
+    {% if report.report_type.strip.upper  == 'MILEAGE' %}
+      <h3>Пробег по автомобилям</h3>
+
+      {% for car_number, car_data in report.result_data.data.items %}
+        <div class="card mb-4">
+          <div class="card-header bg-light">
+            <h5 class="mb-0">{{ car_data.name }}</h5>
+          </div>
+          <div class="card-body">
+            <h6>Итого: <strong>{{car_data.total}} км</strong></h6>
+
+            <table class="table table-sm table-bordered mt-3">
+              <thead class="table-light">
+                <tr>
+                  <th>Период</th>
+                  <th>Пробег, км</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for period, km in car_data.periods.items %}
+                  <tr>
+                    <td>{{ period }}</td>
+                    <td>{{ km }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-muted">Данные по автомобилям отсутствуют</p>
+      {% endfor %}
+
+    {% elif report.report_type == 'DRIVER_ASSIGNMENT' %}
+      <h4 class="mb-3">Назначение водителей автомобилям</h4>
+
+      <!-- Сводка -->
+      {% if report.result_data.summary %}
+      <div class="row1">
+          <h6 class="mb-0">{{ report.result_data.summary.total_vehicles }} Автомобилей</h6>
+          <h6 class="mb-0">{{ report.result_data.summary.total_drivers }} Водителей</h6>
+          <h6 class="mb-0">{{ report.result_data.summary.assignments_in_period }} Назначений</h6>
+      </div>
+      {% endif %}
+
+  <!-- Группировка по периодам -->
+  {% for period_key, vehicles_data in report.result_data.data.items %}
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">
+        <i class="bi bi-calendar3 me-2"></i>
+        {{ period_key }}
+      </h5>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="py-3 px-3">Автомобиль</th>
+              <th class="py-3 px-3">Предприятие</th>
+              <th class="py-3 px-3">Водители</th>
+              <th class="py-3 px-3">Дата назначения</th>
+              <th class="py-3 px-3">Статус</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for car_number, car_data in vehicles_data.items %}
+              {% for driver in car_data.drivers %}
+              <tr>
+                <td class="px-3 align-middle">
+                  <strong>{{ car_number }}</strong><br>
+                  <small class="text-muted">{{ car_data.brand }}</small>
+                </td>
+                <td class="px-3 align-middle">{{ car_data.enterprise }}</td>
+                <td class="px-3 align-middle">{{ driver.name }}</td>
+                <td class="px-3 align-middle">{{ driver.assigned_date }}</td>
+                <td class="px-3 align-middle">
+                  {% if driver.is_active %}
+                    <span class="badge bg-success">Основной</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Дополнительный</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+    <div class="alert alert-warning">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      Назначений не найдено
+    </div>
+  {% endfor %}
+
+    {% else %}
+      <div class="alert alert-warning">
+        Неизвестный тип отчёта: {{ report.report_type }}
+      </div>
+    {% endif %}
+
+  {% endif %}
+
+</div>
+
+<style>
+    .row1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 10px;
+    }
+
+    .card {
+    max-width: 100%;
+    }
+
+  .reports-page-wrapper {
+    width: 100%;
+    padding-left: 3%;
+    padding-right: 3%;
+    padding-top: 20px;
+    padding-bottom: 40px;
+  }
+
+  /* Адаптивность для маленьких экранов */
+  @media (max-width: 768px) {
+    .reports-page-wrapper {
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+  }
+
+</style>
+
+{% endblock %}
+

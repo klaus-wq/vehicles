@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    @font-face {
+      font-family: "DejaVu Sans";
+      src: url("/static/fonts/DejaVuSans.ttf");
+    }
+
+    @font-face {
+      font-family: "DejaVu Sans";
+      src: url("/static/fonts/DejaVuSans-Bold.ttf");
+      font-weight: bold;
+    }
+
+    body {
+      font-family: "DejaVu Sans", Arial, sans-serif;
+      font-size: 12px;
+      line-height: 1.5;
+      margin: 20px;
+    }
+
+    h1 {
+      color: #2c3e50;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 10px;
+      font-size: 18px;
+    }
+
+    h2 {
+      color: #34495e;
+      font-size: 14px;
+      margin-top: 20px;
+    }
+
+    h3 {
+      color: #7f8c8d;
+      font-size: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+
+    th, td {
+      border: 1px solid #bdc3c7;
+      padding: 8px;
+      text-align: left;
+      font-size: 10px;
+    }
+
+    th {
+      background-color: #3498db;
+      color: white;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background-color: #ecf0f1;
+    }
+
+    .meta {
+      background: #f8f9fa;
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid #dee2e6;
+    }
+
+    .summary {
+      background: #e8f4f8;
+      padding: 15px;
+      margin: 20px 0;
+      border: 1px solid #bee5eb;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      font-size: 9px;
+      border-radius: 3px;
+    }
+
+    .badge-success {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .badge-secondary {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    .row1 {
+      display: table;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .row1-cell {
+      display: table-cell;
+      padding: 10px;
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>{{ report.name }}</h1>
+
+  <div class="meta">
+    <p><strong>Тип:</strong> {{ report.get_report_type_display }}</p>
+    <p><strong>Период:</strong> {{ report.get_period_display }}</p>
+    <p><strong>Даты:</strong> {{ report.start_date|date:"d.m.Y" }} — {{ report.end_date|date:"d.m.Y" }}</p>
+    <p><strong>Создан:</strong> {{ report.created_at|date:"d.m.Y H:i" }}</p>
+  </div>
+
+  {% if report.report_type == 'MILEAGE' %}
+    <h2>Пробег по автомобилям</h2>
+          {% for car_number, car_data in report.result_data.data.items %}
+
+   <h3 style="background: #3498db; color: white; padding: 5px;">{{ car_data.name|default:car_number }}</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Период</th>
+          <th>Пробег (км)</th>
+        </tr>
+      </thead>
+      <tbody>
+          {% for period, km in car_data.periods.items %}
+            <tr>
+              <td>{{ period }}</td>
+              <td>{{ km }}</td>
+            </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+            {% endfor %}
+
+
+  {% elif report.report_type == 'DRIVER_ASSIGNMENT' %}
+    <h2>Назначение водителей</h2>
+
+    {% if report.result_data.summary %}
+    <div class="row1">
+      <div class="row1-cell">
+        <strong>{{ report.result_data.summary.total_vehicles|default:0 }}</strong><br>
+        <small>Автомобилей</small>
+      </div>
+      <div class="row1-cell">
+        <strong>{{ report.result_data.summary.total_drivers|default:0 }}</strong><br>
+        <small>Водителей</small>
+      </div>
+      <div class="row1-cell">
+        <strong>{{ report.result_data.summary.assignments_in_period|default:0 }}</strong><br>
+        <small>Назначений</small>
+      </div>
+    </div>
+    {% endif %}
+  {% for period_key, vehicles_data in report.result_data.data.items %}
+      {% if period_key != 'summary' and period_key != 'period' and period_key != 'type' and period_key != 'unit' %}
+
+ <h3 style="background: #3498db; color: white; padding: 5px;">{{ period_key }}</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Автомобиль</th>
+              <th>Предприятие</th>
+              <th>Водитель</th>
+              <th>Дата назначения</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for car_number, car_data in vehicles_data.items %}
+              {% for driver in car_data.drivers %}
+                <tr>
+                  <td><strong>{{ car_number }}</strong></td>
+                  <td>{{ car_data.enterprise }}</td>
+                  <td>{{ driver.name }}</td>
+                  <td>{{ driver.assigned_date }}</td>
+                  <td>
+                    {% if driver.is_active %}
+                      <span class="badge badge-success">Основной</span>
+                    {% else %}
+                      <span class="badge badge-secondary">Дополнительный</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            {% endfor %}
+          </tbody>
+        </table>
+
+      {% endif %}
+    {% endfor %}
+
+  {% elif report.report_type == 'TRIPS_COUNT' %}
+    <h2>Количество поездок</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Автомобиль</th>
+          <th>Период</th>
+          <th>Количество</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for car_number, car_data in report.result_data.data.items %}
+          {% for period, count in car_data.periods.items %}
+            <tr>
+              <td>{{ car_data.name|default:car_number }}</td>
+              <td>{{ period }}</td>
+              <td>{{ count }}</td>
+            </tr>
+          {% endfor %}
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+
+  <p style="margin-top: 40px; font-size: 9px; color: #999; text-align: center;">
+    Сгенерировано: {{ generated_at|date:"d.m.Y H:i" }} | Отчёт №{{ report.id }}
+  </p>
+</body>
+</html>
