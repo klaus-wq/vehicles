@@ -1,4 +1,4 @@
-name: Deploy to Arch Linux
+name: Deploy
 
 on:
   push:
