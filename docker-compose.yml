@@ -1,0 +1,53 @@
+services:
+  web:
+    build: .
+    container_name: vehicles_web
+    ports:
+      - "8080:8080"
+    command: bash -c "python manage.py runserver 0.0.0.0:8080"
+    env_file:
+      - .env.docker
+    environment:
+      - DEBUG=${DEBUG:-1}
+      - SECRET_KEY=${SECRET_KEY:-dev-key-change-me}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-"*"}
+      - DB_HOST=db
+      - DB_PORT=5432
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - djangonetwork
+    volumes:
+      - .:/app
+
+  db:
+    # 🔑 ИСПРАВЛЕНО: либо image, либо build — не оба сразу!
+    build:
+      context: .
+      dockerfile: Dockerfile.db
+    # image: postgis/postgis:16-3.5-alpine  # ← закомментируйте, если используете build
+    container_name: vehicles_db
+    env_file:
+      - .env.docker
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-vehicles5}
+      - POSTGRES_USER=${POSTGRES_USER:-vehicleuser2}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-admin}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-vehicleuser2} -d ${POSTGRES_DB:-vehicles5}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - djangonetwork
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+volumes:
+  pg_data:
+
+networks:
+  djangonetwork:
+    driver: bridge

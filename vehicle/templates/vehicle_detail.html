@@ -113,7 +113,7 @@
                       <div class="form-check">
                         <input class="form-check-input" type="checkbox" name="trip_ids" value="{{ trip.id }}" id="trip_{{ trip.id }}">
                         <label class="form-check-label" for="trip_{{ trip.id }}">
-                          Поездка от {{ trip.start_time|date:"d.m.Y" }}
+                          Поездка {{ trip.id }} от {{ trip.start_time|date:"d.m.Y" }}
                           {% if trip.end_time %} — {{ trip.end_time|date:"d.m.Y" }}{% endif %}
                             {{ trip.start_address|default:"" }} — {{ trip.end_address|default:"" }}
                         </label>

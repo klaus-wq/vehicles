@@ -15,7 +15,6 @@ from .models import Vehicle, Brand, Enterprise, Driver, DriverVehicle
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.db.models import Q
-from import_export.exceptions import ImportError
 from .permissions import ManagerPermissionAdmin
 
 class ManagerInline(admin.StackedInline):
@@ -296,6 +295,7 @@ class TelemetryPointResource(resources.ModelResource):
             'speed',
             'location',
             'trip_guid',
+            'points'
         )
 
 class TelemetryTripResource(resources.ModelResource):
