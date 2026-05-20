@@ -27,6 +27,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['192.168.220.236', 'localhost', '127.0.0.1', '72.56.34.61']
 
+CSRF_TRUSTED_ORIGINS = [
+    'http://72.56.34.61:8080',
+    'http://localhost:8080',
+]
+
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # куда собирать статику
 
